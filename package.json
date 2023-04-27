@@ -1,0 +1,19 @@
+{
+  "name": "order-consolidator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server --ignore client",
+    "develop": "concurrently \"cd server && yarn start\" \"cd client && yarn start\"",
+    "install": "cd server && yarn install && cd ../client && yarn install",
+    "seed": "cd server && yarn seed",
+    "build": "cd client && yarn build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^5.1.0"
+  }
+}
