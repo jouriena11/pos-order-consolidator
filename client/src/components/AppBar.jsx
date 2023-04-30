@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation, Outlet, Link } from "react-router-dom";
 import {
   styled,
   alpha,
@@ -18,7 +19,9 @@ import {
   ListItemText,
   Collapse,
   Tooltip,
-  useMediaQuery,
+  Badge,
+  Grid,
+  Container,
 } from "@mui/material";
 
 import MuiAppBar from "@mui/material/AppBar";
@@ -37,35 +40,38 @@ import SearchIcon from "@mui/icons-material/Search"; // search magnifier icon
 import NotificationsIcon from "@mui/icons-material/Notifications"; // notification icon
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout"; // checkout icon
 import PendingActionsIcon from "@mui/icons-material/PendingActions"; // pending order icon
+import SoupKitchenIcon from "@mui/icons-material/SoupKitchen"; // Kitchen Orders icon
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale"; // POS Order Page icon
 
-import OrderSummaryDrawer from "./OrderSummaryDrawer";
+import OrderSummaryDrawer from "./OrderSummary/OrderSummaryDrawer";
 
-// TODO: JavaScript function to be in which folder? src/utils?
 // TODO: if OrderSummaryDrawer is open (i.e. on mobile screen), it should be automatically closed when a user tabs the hamburger icon
-// Also, 'Order Consolidator' title, the search bar, the 'pending order', and menu cards should be hidden, whereas the notification icon is pushed to the left
+// TODO: Also, 'Order Consolidator' title, the search bar, the 'pending order', and menu cards should be hidden, whereas the notification icon is pushed to the left
+// TODO: kitchen user (e.g. Chef) can only access Profile, Kitchen Orders, Report, and Log Out menu
 
 const drawerWidth = 240;
+const headerHeight = 64;
 
-// const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
-//   ({ theme, open }) => ({
-//     flexGrow: 1,
-//     padding: theme.spacing(3),
-//     transition: theme.transitions.create('margin', {
-//       easing: theme.transitions.easing.sharp,
-//       duration: theme.transitions.duration.leavingScreen,
-//     }),
-//     marginLeft: `-${drawerWidth}px`,
-//     ...(open && {
-//       transition: theme.transitions.create('margin', {
-//         easing: theme.transitions.easing.easeOut,
-//         duration: theme.transitions.duration.enteringScreen,
-//       }),
-//       marginLeft: 0,
-//     }),
-//   }),
-// );
+const Main = styled("main", {
+  shouldForwardProp: (prop) => prop !== "open",
+})(({ theme, open }) => ({
+  marginTop: headerHeight,
+  flexGrow: 1,
+  padding: theme.spacing(3),
+  transition: theme.transitions.create("margin", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  marginLeft: `-${drawerWidth}px`,
+  ...(open && {
+    transition: theme.transitions.create("margin", {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginLeft: 0,
+  }),
+}));
 
-// TODO: why is (({ theme, open }) outside the styled() if they're the same block of codes?
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
@@ -80,7 +86,7 @@ const AppBar = styled(MuiAppBar, {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
-  })
+  }),
 }));
 
 // Search Bar
@@ -138,20 +144,58 @@ const MainDrawerMenu = [
   {
     name: "Dashboard",
     icon: <SpaceDashboardIcon />,
+    link: "#",
+  },
+  {
+    name: "POS Order Page",
+    icon: <PointOfSaleIcon />,
+    link: "/pos",
   },
   {
     name: "Profile",
-    subMenus: ["Update Profile", "Change Password"],
+    subMenus: [
+      {
+        name: "Update Profile",
+        link: "/update-profile",
+      },
+      {
+        name: "Change Password",
+        link: "/change-password",
+      },
+    ],
     icon: <AccountBoxIcon />,
   },
   {
     name: "Menu",
-    subMenus: ["Add New Menu", "Update Menu", "Delete Menu"],
+    subMenus: [
+      {
+        name: "Add New Menu",
+        link: "/add-menu",
+      },
+      {
+        name: "Update Menu",
+        link: "/update-menu",
+      },
+      {
+        name: "Delete Menu",
+        link: "/delete-menu",
+      },
+    ],
     icon: <RestaurantIcon />,
   },
   {
+    name: "Kitchen Orders",
+    icon: <SoupKitchenIcon />,
+    link: "/kitchen-orders",
+  },
+  {
     name: "Report",
-    subMenus: ["Order Status"],
+    subMenus: [
+      {
+        name: "Order Status",
+        link: "/order-status-report", // TODO: how to combine this with Express, e.g. reports/order-status-report
+      },
+    ],
     icon: <AssessmentIcon />,
   },
 ];
@@ -165,9 +209,41 @@ const MainDrawerMenu2 = [
 
 export default function NavBar() {
   const theme = useTheme(); // TODO: what if the mainTheme specified in App.jsx is to be used?
+  const location = useLocation().pathname;
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState(-1);
-  const [openOrderSummaryMenu, setOpenOrderSummaryMenu] = useState(false);
+  const [openOrderSummary, setOpenOrderSummary] = useState(false);
+
+  // const [pageTitle, setPageTitle] = useState("");
+
+  // switch (location) {
+  //   case "/pos":
+  //     setPageTitle("POS Order Page");
+  //     break;
+  //   case "/kitchen-orders":
+  //     setPageTitle("Kitchen Orders");
+  //     break;
+  //   case "/update-profile":
+  //     setPageTitle("Update Profile");
+  //   case "/change-password":
+  //     setPageTitle("Change Password");
+  //     break;
+  //   case "/add-menu":
+  //     setPageTitle("Add Menu");
+  //     break;
+  //   case "/update-menu":
+  //     setPageTitle("Update Menu");
+  //     break;
+  //   case "/delete-menu":
+  //     setPageTitle("Delete Menu");
+  //     break;
+  //   case "/order-status-report":
+  //     setPageTitle("Order Status Report");
+  //     break;
+  //   default:
+  //     setPageTitle('/');
+  //     break;
+  // }
 
   const handleMainDrawerOpen = () => {
     setOpen(true);
@@ -178,78 +254,84 @@ export default function NavBar() {
   };
 
   const handleOrderSummaryDrawerOpen = () => {
-    setOpenOrderSummaryMenu(true);
+    setOpenOrderSummary(true);
   };
 
   const handleOrderSummaryDrawerClose = () => {
-    setOpenOrderSummaryMenu(false);
+    setOpenOrderSummary(false);
   };
 
   const MainMenuDrawer = (
     <>
       <MainDrawerHeader sx={{ backgroundColor: "rgb(24,118,209, 0.75)" }}>
-          <IconButton onClick={handleMainDrawerClose}>
-            {theme.direction === "ltr" ? (
-              <ChevronLeftIcon />
-            ) : (
-              <ChevronRightIcon />
-            )}
-          </IconButton>
-        </MainDrawerHeader>
-        <Divider />
-        {/* TODO: still don't understand the logic... of setOpenMenu(openMenu === index ? -1 : index) */}
-        <List>
-          {MainDrawerMenu.map((menu, index) => {
-            if (menu.subMenus) {
-              return (
-                <div key={index}>
-                  <ListItemButton
-                    onClick={() => setOpenMenu(openMenu === index ? -1 : index)}
-                  >
-                    <ListItemIcon>{menu.icon}</ListItemIcon>
-                    <ListItemText primary={menu.name} />
-                    {openMenu === index ? <ExpandLess /> : <ExpandMore />}
-                  </ListItemButton>
-                  <Collapse
-                    in={openMenu === index}
-                    timeout="auto"
-                    unmountOnExit
-                  >
-                    <List component="div" disablePadding>
-                      {menu.subMenus.map((subMenu, subIndex) => (
+        <IconButton onClick={handleMainDrawerClose}>
+          {theme.direction === "ltr" ? (
+            <ChevronLeftIcon />
+          ) : (
+            <ChevronRightIcon />
+          )}
+        </IconButton>
+      </MainDrawerHeader>
+      <Divider />
+      {/* TODO: still don't understand the logic... of setOpenMenu(openMenu === index ? -1 : index) */}
+      <List>
+        {MainDrawerMenu.map((menu, index) => {
+          if (menu.subMenus) {
+            return (
+              <div key={index}>
+                <ListItemButton
+                  onClick={() => setOpenMenu(openMenu === index ? -1 : index)}
+                >
+                  <ListItemIcon>{menu.icon}</ListItemIcon>
+                  <ListItemText primary={menu.name} />
+                  {openMenu === index ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+                <Collapse in={openMenu === index} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
+                    {menu.subMenus.map((subMenu, subIndex) => (
+                      <Link
+                        to={subMenu.link}
+                        style={{ color: "inherit", textDecoration: "none" }}
+                      >
                         <ListItemButton key={subIndex} sx={{ pl: 9 }}>
-                          <ListItemText primary={subMenu} />
+                          <ListItemText primary={subMenu.name} />
                         </ListItemButton>
-                      ))}
-                    </List>
-                  </Collapse>
-                </div>
-              );
-            } else {
-              return (
+                      </Link>
+                    ))}
+                  </List>
+                </Collapse>
+              </div>
+            );
+          } else {
+            return (
+              <Link
+                to={menu.link}
+                style={{ color: "inherit", textDecoration: "none" }}
+              >
                 <ListItemButton key={index}>
                   <ListItemIcon>{menu.icon}</ListItemIcon>
                   <ListItemText primary={menu.name} />
                 </ListItemButton>
-              );
-            }
-          })}
-        </List>
+              </Link>
+            );
+          }
+        })}
+      </List>
 
-        <Divider />
+      <Divider />
 
-        <List>
-          {MainDrawerMenu2.map((menu, index) => (
-            <ListItem key={index} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>{menu.icon}</ListItemIcon>
-                <ListItemText primary={menu.name} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+      <List>
+        {MainDrawerMenu2.map((menu, index) => (
+          <ListItem key={index} disablePadding>
+            <ListItemButton>
+              <ListItemIcon>{menu.icon}</ListItemIcon>
+              <ListItemText primary={menu.name} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
     </>
-  )
+  );
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -265,29 +347,42 @@ export default function NavBar() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{fontWeight: "700"}}>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ fontWeight: "700" }}
+          >
+            {/* TODO: to dynamically change page title */}
             POS Order Page
           </Typography>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Menu search"
-              inputProps={{ "aria-label": "search" }}
-            />
-          </Search>
+          {location === "/pos" && (
+            <Search>
+              <SearchIconWrapper>
+                <SearchIcon />
+              </SearchIconWrapper>
+              <StyledInputBase
+                placeholder="Menu search"
+                inputProps={{ "aria-label": "search" }}
+              />
+            </Search>
+          )}
           <Box sx={{ flexGrow: 1 }} />
           <Tooltip title="Pending Orders" arrow>
             <IconButton color="inherit">
               <PendingActionsIcon />
             </IconButton>
           </Tooltip>
+
+          {/* TODO: to fix badge position */}
           <Tooltip title="Notifications" arrow>
+            {/* <Badge badgeContent={1} color="secondary"> */}
             <IconButton color="inherit">
               <NotificationsIcon />
             </IconButton>
+            {/* </Badge> */}
           </Tooltip>
+
           <Tooltip title="Checkout" arrow>
             <IconButton
               color="inherit"
@@ -301,12 +396,6 @@ export default function NavBar() {
           </Tooltip>
         </Toolbar>
       </AppBar>
-
-      <OrderSummaryDrawer
-        open={openOrderSummaryMenu}
-        onClose={handleOrderSummaryDrawerClose}
-      />
-
       {/* Main Drawer on the left */}
       <Drawer
         sx={{
@@ -323,36 +412,16 @@ export default function NavBar() {
       >
         {MainMenuDrawer}
       </Drawer>
-
-      {/* <Main open={open}>
-        <Typography paragraph>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-          tempor incididunt ut labore et dolore magna aliqua. Rhoncus dolor purus non
-          enim praesent elementum facilisis leo vel. Risus at ultrices mi tempus
-          imperdiet. Semper risus in hendrerit gravida rutrum quisque non tellus.
-          Convallis convallis tellus id interdum velit laoreet id donec ultrices.
-          Odio morbi quis commodo odio aenean sed adipiscing. Amet nisl suscipit
-          adipiscing bibendum est ultricies integer quis. Cursus euismod quis viverra
-          nibh cras. Metus vulputate eu scelerisque felis imperdiet proin fermentum
-          leo. Mauris commodo quis imperdiet massa tincidunt. Cras tincidunt lobortis
-          feugiat vivamus at augue. At augue eget arcu dictum varius duis at
-          consectetur lorem. Velit sed ullamcorper morbi tincidunt. Lorem donec massa
-          sapien faucibus et molestie ac.
-        </Typography>
-        <Typography paragraph>
-          Consequat mauris nunc congue nisi vitae suscipit. Fringilla est ullamcorper
-          eget nulla facilisi etiam dignissim diam. Pulvinar elementum integer enim
-          neque volutpat ac tincidunt. Ornare suspendisse sed nisi lacus sed viverra
-          tellus. Purus sit amet volutpat consequat mauris. Elementum eu facilisis
-          sed odio morbi. Euismod lacinia at quis risus sed vulputate odio. Morbi
-          tincidunt ornare massa eget egestas purus viverra accumsan in. In hendrerit
-          gravida rutrum quisque non tellus orci ac. Pellentesque nec nam aliquam sem
-          et tortor. Habitant morbi tristique senectus et. Adipiscing elit duis
-          tristique sollicitudin nibh sit. Ornare aenean euismod elementum nisi quis
-          eleifend. Commodo viverra maecenas accumsan lacus vel facilisis. Nulla
-          posuere sollicitudin aliquam ultrices sagittis orci a.
-        </Typography>
-      </Main> */}
+      <Main open={open}>
+        <Outlet />
+      </Main>
+      {/* Order Summary (Permanent/Persistent) Drawer on the right */}
+      {location === "/pos" && (
+        <OrderSummaryDrawer
+          open={openOrderSummary}
+          onClose={handleOrderSummaryDrawerClose}
+        />
+      )}
     </Box>
   );
 }
