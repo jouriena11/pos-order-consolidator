@@ -206,12 +206,13 @@ function Row(props) {
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+        <TableCell style={{ padding: 0 }} colSpan={7}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Table size="small" aria-label="purchases">
                 <TableHead>
                   <TableRow>
+                  <TableCell width={100} />
                     <TableCell sx={{ fontWeight: 700 }} align="center">
                       Order ID
                     </TableCell>
@@ -232,6 +233,7 @@ function Row(props) {
                 <TableBody>
                   {row.history.map((historyRow) => (
                     <TableRow key={historyRow.date}>
+                      <TableCell width={100}/>
                       <TableCell align="center" component="th" scope="row">
                         {/* TODO: to change value */}
                         {historyRow.date}
@@ -290,24 +292,6 @@ Row.propTypes = {
   }).isRequired,
 };
 
-Row.propTypes = {
-  row: PropTypes.shape({
-    calories: PropTypes.number.isRequired,
-    carbs: PropTypes.number.isRequired,
-    fat: PropTypes.number.isRequired,
-    history: PropTypes.arrayOf(
-      PropTypes.shape({
-        amount: PropTypes.number.isRequired,
-        customerId: PropTypes.string.isRequired,
-        date: PropTypes.string.isRequired,
-      })
-    ).isRequired,
-    name: PropTypes.string.isRequired,
-    price: PropTypes.number.isRequired,
-    protein: PropTypes.number.isRequired,
-  }).isRequired,
-};
-
 // order_id, order_created_at, cooking_status
 
 // const rows = [
@@ -324,7 +308,7 @@ export default function KitchenOrders() {
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
-            <TableCell />
+            <TableCell width={100} />
             <TableCell align="center" sx={{ fontWeight: 700 }}>
               <Tooltip title="Ordered Menu" placement="top" arrow>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>

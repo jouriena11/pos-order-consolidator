@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, Outlet, Link } from "react-router-dom";
 import {
   styled,
@@ -22,6 +22,7 @@ import {
   Badge,
   Grid,
   Container,
+  useMediaQuery,
 } from "@mui/material";
 
 import MuiAppBar from "@mui/material/AppBar";
@@ -42,6 +43,7 @@ import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import PendingActionsIcon from "@mui/icons-material/PendingActions"; // pending order icon
 import SoupKitchenIcon from "@mui/icons-material/SoupKitchen"; // Kitchen Orders icon
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale"; // POS Order Page icon
+import KeyIcon from '@mui/icons-material/Key'; // Permissions icon
 
 import OrderSummaryDrawer from "./OrderSummary/OrderSummaryDrawer";
 
@@ -72,24 +74,9 @@ const Main = styled("main", {
   }),
 }));
 
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
-  transition: theme.transitions.create(["margin", "width"], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: `${drawerWidth}px`,
-    transition: theme.transitions.create(["margin", "width"], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
-
 // Search Bar
+// TODO: to replace search bar with magnifier icon on mobile screen
+
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -105,7 +92,6 @@ const Search = styled("div")(({ theme }) => ({
     width: "auto",
   },
 }));
-
 const SearchIconWrapper = styled("div")(({ theme }) => ({
   padding: theme.spacing(0, 2),
   height: "100%",
@@ -202,6 +188,10 @@ const MainDrawerMenu = [
 
 const MainDrawerMenu2 = [
   {
+    name: "Permissions",
+    icon: <KeyIcon />,
+  },
+  {
     name: "Log out",
     icon: <LogoutIcon />,
   },
@@ -214,36 +204,65 @@ export default function NavBar() {
   const [openMenu, setOpenMenu] = useState(-1);
   const [openOrderSummary, setOpenOrderSummary] = useState(false);
 
-  // const [pageTitle, setPageTitle] = useState("");
+  const [pageTitle, setPageTitle] = useState("");
 
-  // switch (location) {
-  //   case "/pos":
-  //     setPageTitle("POS Order Page");
-  //     break;
-  //   case "/kitchen-orders":
-  //     setPageTitle("Kitchen Orders");
-  //     break;
-  //   case "/update-profile":
-  //     setPageTitle("Update Profile");
-  //   case "/change-password":
-  //     setPageTitle("Change Password");
-  //     break;
-  //   case "/add-menu":
-  //     setPageTitle("Add Menu");
-  //     break;
-  //   case "/update-menu":
-  //     setPageTitle("Update Menu");
-  //     break;
-  //   case "/delete-menu":
-  //     setPageTitle("Delete Menu");
-  //     break;
-  //   case "/order-status-report":
-  //     setPageTitle("Order Status Report");
-  //     break;
-  //   default:
-  //     setPageTitle('/');
-  //     break;
-  // }
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const rightDrawerWidth = isMobile ? "80%" : 380 + "px";
+
+  const AppBar = styled(MuiAppBar, {
+    shouldForwardProp: (prop) => prop !== "open",
+  })(({ theme, open }) => ({
+    transition: theme.transitions.create(["margin", "width", "left"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    left: 0,
+    width: `calc(100% - ${isMobile || location !=='/pos' ? "0px" : rightDrawerWidth})`,
+    ...(open && {
+      width: `calc(100% - ${drawerWidth}px - ${
+        isMobile || location !=='/pos' ? "0px" : rightDrawerWidth
+      })`,
+      left: `${drawerWidth}px`,
+      transition: theme.transitions.create("all", {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+    }),
+  }));
+
+  console.log(location);
+
+  useEffect(() => {
+    switch (location) {
+      case "/pos":
+        setPageTitle("POS Order Page");
+        break;
+      case "/kitchen-orders":
+        setPageTitle("Kitchen Orders");
+        break;
+      case "/update-profile":
+        setPageTitle("Update Profile");
+        break;
+      case "/change-password":
+        setPageTitle("Change Password");
+        break;
+      case "/add-menu":
+        setPageTitle("Add Menu");
+        break;
+      case "/update-menu":
+        setPageTitle("Update Menu");
+        break;
+      case "/delete-menu":
+        setPageTitle("Delete Menu");
+        break;
+      case "/order-status-report":
+        setPageTitle("Order Status Report");
+        break;
+      default:
+        setPageTitle("/");
+        break;
+    }
+  }, [location]);
 
   const handleMainDrawerOpen = () => {
     setOpen(true);
@@ -292,6 +311,9 @@ export default function NavBar() {
                       <Link
                         to={subMenu.link}
                         style={{ color: "inherit", textDecoration: "none" }}
+                        onClick={() => {
+                          setOpen(false);
+                        }}
                       >
                         <ListItemButton key={subIndex} sx={{ pl: 9 }}>
                           <ListItemText primary={subMenu.name} />
@@ -307,6 +329,9 @@ export default function NavBar() {
               <Link
                 to={menu.link}
                 style={{ color: "inherit", textDecoration: "none" }}
+                onClick={() => {
+                  setOpen(false);
+                }}
               >
                 <ListItemButton key={index}>
                   <ListItemIcon>{menu.icon}</ListItemIcon>
@@ -353,8 +378,7 @@ export default function NavBar() {
             component="div"
             sx={{ fontWeight: "700" }}
           >
-            {/* TODO: to dynamically change page title */}
-            POS Order Page
+            {pageTitle}
           </Typography>
           {location === "/pos" && (
             <Search>
@@ -383,17 +407,19 @@ export default function NavBar() {
             {/* </Badge> */}
           </Tooltip>
 
-          <Tooltip title="Checkout" arrow>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              onClick={handleOrderSummaryDrawerOpen}
-              edge="end"
-              // sx={{ mr: 2, ...(open && { display: "none" }) }}
-            >
-              <ShoppingCartCheckoutIcon />
-            </IconButton>
-          </Tooltip>
+          {isMobile && (
+            <Tooltip title="Checkout" arrow>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleOrderSummaryDrawerOpen}
+                edge="end"
+                // sx={{ mr: 2, ...(open && { display: "none" }) }}
+              >
+                <ShoppingCartCheckoutIcon />
+              </IconButton>
+            </Tooltip>
+          )}
         </Toolbar>
       </AppBar>
       {/* Main Drawer on the left */}
@@ -420,6 +446,8 @@ export default function NavBar() {
         <OrderSummaryDrawer
           open={openOrderSummary}
           onClose={handleOrderSummaryDrawerClose}
+          isMobile={isMobile}
+          drawerWidth={rightDrawerWidth}
         />
       )}
     </Box>

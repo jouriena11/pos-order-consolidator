@@ -2,7 +2,6 @@ import React, { useState } from "react"
 import {
   styled,
   useTheme,
-  useMediaQuery,
   Drawer,
   IconButton,
   Divider,
@@ -51,11 +50,7 @@ const PaymentMethod = [
 export default function OrderSummaryDrawer(props) {
   const theme = useTheme();
 
-  const { open, onClose } = props;
-
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
-  const drawerWidth = isMobile ? "80%" : 380;
+  const { open, onClose, isMobile, drawerWidth } = props;
 
   // Customer Name Input
   const [customerName, setCustomerName] = useState("");

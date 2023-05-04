@@ -61,15 +61,22 @@ To run this web application in a local server, the following libraries must be i
 
 ---
 ## **Future Development**
+
+### UX/UI
 - to include a proper app logo
 - to include menu category filter tabs in frontend POS order page
-- to limit (cooking) batch size
 - to include menu category
-- to include more reports, e.g. 
+- to limit (cooking) batch size
+
+
 - to include reminder-type notifications (using setTimeout()), i.e. when there's no change in an order/cooking status after a certain period of time, e.g. 5 minutes
 - to implement cutoff point for batch cooking, i.e. in real practice, there is a maximum limit to the amount of servings that can be cooked in batch
 - to apply pagination and category tabs on POS Order page
 - to apply sorting, filtering, and pagination to the order table on Kitchen Orders page
+
+### Analytics
+- to include more reports, e.g.
+    - average time elapsed from the moment an order's status changes from 'ready' to 'served' -- this helps monitorwhether FOH managers are promptly serving the food or regularly updating the order status.  By identifying any delays, this report can assist in improving customer satisfaction and optimizing restaurant operations.
 
 ---
 ## **Contact**

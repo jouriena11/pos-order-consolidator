@@ -17,8 +17,10 @@ import RocketSaladImg from "../assets/img/menu-salad-rocket.jpg";
 import BerrySaladImg from "../assets/img/menu-salad-berry-rhapsody.jpg";
 import BerryAvocadoToastImg from "../assets/img/menu-toast-avocado-strawberry.jpg";
 import PepperoniMagheritaToastImg from "../assets/img/menu-toast-margherita-pepperoni.jpg";
+import { useSelector, useDispatch } from 'react-redux'
+import { decrement, increment } from '../stores/counterSlice'
 
-const menuData = [
+const menuData = [ // TODO: to change static array to useQuery
   {
     id: 1,
     img: CeasarSaladImg,
@@ -57,6 +59,7 @@ const menuData = [
 ];
 
 export default function MenuCard(props) {
+  const count = useSelector(state => state.counter.value)
   const handleMenuClick = (event) => {
     // TODO: to pass menu data to OrderSummaryDrawer
   };
@@ -84,6 +87,7 @@ export default function MenuCard(props) {
   
   return (
     <>
+      {count}
       <ImageList
         // cols={cols}
         cols={3}
