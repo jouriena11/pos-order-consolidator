@@ -19,7 +19,6 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
 // TODO: pending signup - must receive admin approval for a new account to be active
 // TODO: admin would assign the new account a role (i.e. FOH or kitchen)
-// TODO: alternatively, only an admin can access signup page?
 
 function Copyright(props) {
   return (
@@ -29,12 +28,8 @@ function Copyright(props) {
       align="center"
       {...props}
     >
-      {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{" "}
+      {"Copyright © POS "}
       {new Date().getFullYear()}
-      {"."}
     </Typography>
   );
 }

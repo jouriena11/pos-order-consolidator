@@ -25,8 +25,18 @@ const resolvers = {
         throw error;
       }
     },
-    getUsers: async (parent, args) => {
+    getUsers: async (parent, args, context) => {
       try {
+        if (!context.user) {
+          throw new AuthenticationError("User is not logged in");
+        }
+
+        const { role, status } = context.user;
+
+        if(role !== "Admin" && status !== "active") {
+          throw new ForbiddenError("Unauthorized user");
+        }
+
         const users = User.find({});
         return users;
       } catch (error) {
@@ -354,8 +364,6 @@ const resolvers = {
         if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
           throw new ForbiddenError("Unauthorized user");
         }
-
-        // TODO: why is it that img is required?
 
         const newMenu = await Menu.create({
           img,

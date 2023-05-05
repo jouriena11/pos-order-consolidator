@@ -63,7 +63,7 @@ const typeDefs = gql`
     updateUserStatusRole(input: UserRoleStatusUpdateInput!): User
     addMenuCategory(category_name: String!): MenuCategory
     updateMenuCategory(category_id: ID!, category_name: String!): MenuCategory
-    deleteMenuCategory(category_id: ID!): MenuCategory
+    deleteMenuCategory(category_id: ID!): String
     addMenu(input: addMenuInput!): Menu
     updateMenu(input: updateMenuInput!): Menu
     deleteMenu(menu_id: ID!): String
