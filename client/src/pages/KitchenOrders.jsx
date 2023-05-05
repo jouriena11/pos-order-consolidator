@@ -130,7 +130,7 @@ function Row(props) {
     switch (status) {
       case "Cooking":
         return { sx: { backgroundColor: "#ffcc80" } };
-      case "Done":
+      case "Ready":
         return { sx: { backgroundColor: "#4dd0e1" } };
       case "Cancelled":
         return { sx: { backgroundColor: "darkgrey" } };
@@ -170,7 +170,7 @@ function Row(props) {
             >
               <MenuItem value="On Queue">On Queue</MenuItem>
               <MenuItem value="Cooking">Cooking</MenuItem>
-              <MenuItem value="Done">Done</MenuItem>
+              <MenuItem value="Ready">Ready</MenuItem>
               <MenuItem value="Cancelled">Cancelled</MenuItem>
             </Select>
           </FormControl>
@@ -199,7 +199,7 @@ function Row(props) {
         <TableCell align="center">
           <Tooltip title="Save status change" arrow placement="top">
             <IconButton sx={{ color: "grey" }}>
-              {/* TODO: `cancelled` and `done` status Select component should be deactivated once selected and saved  */}
+              {/* TODO: `cancelled` and `ready` status Select component should be deactivated once selected and saved  */}
               <SaveRoundedIcon />
             </IconButton>
           </Tooltip>

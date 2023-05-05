@@ -43,7 +43,7 @@ import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import PendingActionsIcon from "@mui/icons-material/PendingActions"; // pending order icon
 import SoupKitchenIcon from "@mui/icons-material/SoupKitchen"; // Kitchen Orders icon
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale"; // POS Order Page icon
-import KeyIcon from '@mui/icons-material/Key'; // Permissions icon
+import KeyIcon from "@mui/icons-material/Key"; // Permissions icon
 
 import OrderSummaryDrawer from "./OrderSummary/OrderSummaryDrawer";
 
@@ -190,6 +190,7 @@ const MainDrawerMenu2 = [
   {
     name: "Permissions",
     icon: <KeyIcon />,
+    link: "/user-permissions",
   },
   {
     name: "Log out",
@@ -217,10 +218,12 @@ export default function NavBar() {
       duration: theme.transitions.duration.leavingScreen,
     }),
     left: 0,
-    width: `calc(100% - ${isMobile || location !=='/pos' ? "0px" : rightDrawerWidth})`,
+    width: `calc(100% - ${
+      isMobile || location !== "/pos" ? "0px" : rightDrawerWidth
+    })`,
     ...(open && {
       width: `calc(100% - ${drawerWidth}px - ${
-        isMobile || location !=='/pos' ? "0px" : rightDrawerWidth
+        isMobile || location !== "/pos" ? "0px" : rightDrawerWidth
       })`,
       left: `${drawerWidth}px`,
       transition: theme.transitions.create("all", {
@@ -347,12 +350,20 @@ export default function NavBar() {
 
       <List>
         {MainDrawerMenu2.map((menu, index) => (
-          <ListItem key={index} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>{menu.icon}</ListItemIcon>
-              <ListItemText primary={menu.name} />
-            </ListItemButton>
-          </ListItem>
+          <Link
+            to={menu.link}
+            style={{ color: "inherit", textDecoration: "none" }}
+            onClick={() => {
+              setOpen(false);
+            }}
+          >
+            <ListItem key={index} disablePadding>
+              <ListItemButton>
+                <ListItemIcon>{menu.icon}</ListItemIcon>
+                <ListItemText primary={menu.name} />
+              </ListItemButton>
+            </ListItem>
+          </Link>
         ))}
       </List>
     </>

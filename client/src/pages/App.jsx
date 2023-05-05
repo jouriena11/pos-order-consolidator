@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme, Typography } from "@mui/material";
 import "@fontsource/karla";
 
@@ -12,6 +8,7 @@ import SignUp from "./SignUp";
 import NavBar from "../components/AppBar";
 import POSOrderPage from "./POSOrderPage";
 import KitchenOrders from "./KitchenOrders";
+import Permissions from "./Permissions";
 
 const mainTheme = createTheme({
   direction: "ltr",
@@ -35,6 +32,7 @@ function App() {
           <Route element={<NavBar />}>
             <Route path="/pos" element={<POSOrderPage />} />
             <Route path="/kitchen-orders" element={<KitchenOrders />} />
+            <Route path="/user-permissions" element={<Permissions />} />
           </Route>
         </Routes>
       </Router>

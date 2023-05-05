@@ -2,17 +2,15 @@ const {
   AuthenticationError,
   ForbiddenError,
 } = require("apollo-server-express");
-const { User, MenuCategory, Menu } = require("../models");
-const { signToken } = require("../utils/auth");
+const { User, MenuCategory, Menu, Order } = require("../models");
+const {
+  signToken,
+  checkAdmin,
+  checkFOHManager,
+  checkKitchenManager,
+} = require("../utils/auth");
 
 const resolvers = {
-  // getCategoryNames
-  // getMenus
-  // getOrder
-  // getOrders
-  // getOrderStatusReport
-
-  // TODO: getUser is not working. Why?
   Query: {
     getUser: async (parent, args, context) => {
       try {
@@ -28,18 +26,109 @@ const resolvers = {
       }
     },
     getUsers: async (parent, args) => {
-      const users = User.find({});
-      return users;
+      try {
+        const users = User.find({});
+        return users;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    getMenuCategory: async (parent, { category_id }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("User is not logged in");
+        }
+
+        const menuCategory = await MenuCategory.findById(category_id).populate(
+          "menu"
+        );
+        return menuCategory;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    getMenuCategories: async (parent, args, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("User is not logged in");
+        }
+
+        const menuCategories = await MenuCategory.find({}).populate("menu");
+        console.log(menuCategories);
+        return menuCategories;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    getMenu: async (parent, { menu_id }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("User is not logged in");
+        }
+
+        const menu = await Menu.findById(menu_id);
+        return menu;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    getMenus: async (parent, args, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("User is not logged in");
+        }
+        const menus = await Menu.find({});
+        return menus;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    getOrder: async (parent, { order_id }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("User is not logged in");
+        }
+
+        const order = await Order.findById(order_id);
+        return order;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    getOrders: async (parent, args, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("User is not logged in");
+        }
+
+        const orders = await Order.find({});
+        return orders;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
     },
   },
 
   Mutation: {
-    signup: async (
-      parent,
-      { username, email, password, first_name, last_name, role, status },
-      context
-    ) => {
+    signup: async (parent, { input }, context) => {
       try {
+        const {
+          username,
+          email,
+          password,
+          first_name,
+          last_name,
+          role,
+          status,
+        } = input;
+
         const newUser = await User.create({
           username,
           email,
@@ -167,11 +256,17 @@ const resolvers = {
           throw new Error("Input is blank");
         }
 
+        console.log('context.user from resolver =>', context.user)
+
         const { status, role } = context.user;
 
         if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
           throw new ForbiddenError("Unauthorized user");
         }
+
+        // TODO: why aren't the following functions working?
+        // checkAdmin(status, role);
+        // checkFOHManager(status, role);
 
         // TODO: to move .pre("save") here instead
         const newMenuCategory = await MenuCategory.create({
@@ -235,12 +330,10 @@ const resolvers = {
           _id: category_id,
         });
 
-        console.log(
-          `Successfully deleted ${delMenuCategory.deletedCount} MenuCategory document`
-        );
+        return `Successfully deleted ${delMenuCategory.deletedCount} Order document`;
       } catch (error) {
         console.error(error);
-        throw errror;
+        throw error;
       }
     },
     addMenu: async (parent, { input }, context) => {
@@ -254,12 +347,15 @@ const resolvers = {
         }
 
         const { img, name, price, category_id } = input;
+        console.log("img =>", img);
 
         const { role, status } = context.user;
 
         if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
           throw new ForbiddenError("Unauthorized user");
         }
+
+        // TODO: why is it that img is required?
 
         const newMenu = await Menu.create({
           img,
@@ -282,7 +378,7 @@ const resolvers = {
         throw new Error("Object input is empty");
       }
 
-      const { menu_id, img, name, price, category_id } = input;
+      const { menu_id, img, name, price } = input;
       const { role, status } = context.user;
 
       if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
@@ -291,36 +387,26 @@ const resolvers = {
 
       const menu = await Menu.findById(menu_id);
 
-      if (
-        img === menu.img &&
-        name === menu.name &&
-        price == menu.price &&
-        category_id === menu.category_id
-      ) {
+      if (img === menu.img && name === menu.name && price == menu.price) {
         return {
           message: "No update needed",
         };
       }
 
-      if(img) {
+      if (img) {
         menu.img = img;
       }
 
-      if(name) {
+      if (name) {
         menu.name = name;
       }
 
-      if(price) {
+      if (price) {
         menu.price = price;
-      }
-
-      if(category_id) {
-        menu.category_id = category_id;
       }
 
       const updatedMenu = await menu.save();
       return updatedMenu;
-
     },
     deleteMenu: async (parent, { menu_id }, context) => {
       try {
@@ -339,16 +425,104 @@ const resolvers = {
 
         const delMenu = await Menu.deleteOne({ _id: menu_id });
 
-        return `Successfully deleted ${delMenu.deletedCount} Menu document`
+        return `Successfully deleted ${delMenu.deletedCount} Menu document`;
       } catch (error) {
         console.error(error);
         throw error;
       }
     },
+    submitOrder: async (parent, { input }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("User is not logged in");
+        }
 
-    // submitOrder (POST) => save to database + send notification to Kitchen +
-    // cancelOrder (UPDATE)
-    // updateOrderStatus
+        if (Object.keys(input).length === 0) {
+          throw new Error("Input object is empty");
+        }
+
+        const { role, status } = context.user;
+
+        if (role !== "FOH Manager" && role !== "Admin" && status !== "active") {
+          throw new ForbiddenError("Unauthorized user");
+        }
+
+        const { order_status, customer_name, cooking_status, menu_items } =
+          input;
+
+        // Sum of each menuItem order_qty
+        let total = 0;
+        menu_items.forEach((item) => {
+          const { order_qty } = item;
+          total += order_qty;
+        });
+
+        const newOrder = await Order.create({
+          order_status,
+          customer_name,
+          cooking_status,
+          menu_items,
+          total,
+        });
+
+        // newOrder.menu_items = await newOrder.menu_items.populate('menu');
+
+        console.log("newOrder => ", newOrder);
+
+        return newOrder;
+
+        // TODO: send notification to the Kitchen + automatically update Kitchen Orders
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    updateOrder: async (parent, { order_id, order_status }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("User is not logged in");
+        }
+
+        const { role, status } = context.user;
+
+        if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
+          throw new ForbiddenError("Unauthorized user");
+        }
+
+        const updatedOrder = await Order.findByIdAndUpdate(
+          { _id: order_id },
+          { order_status },
+          { new: true }
+        );
+
+        return updatedOrder;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    deleteOrder: async (parent, { order_id }, context) => {
+      if (!context.user) {
+        throw new AuthenticationError("User is not logged in");
+      }
+
+      if (!order_id) {
+        throw new Error("Input value is blank");
+      }
+
+      // checkAdmin(context);
+      // checkFOHManager(context);
+
+      const { status, role } = context.user;
+
+      if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
+        throw new ForbiddenError("Unauthorized user");
+      }
+
+      const delOrder = await Order.deleteOne({ _id: order_id });
+
+      return `Successfully deleted ${delOrder.deletedCount} Order document`;
+    },
   },
 };
 

@@ -1,5 +1,5 @@
 const { Schema, model } = require("mongoose");
-const User = require('./User');
+const Menu = require('./Menu');
 
 const menuCategorySchema = new Schema(
   {
@@ -8,7 +8,12 @@ const menuCategorySchema = new Schema(
       required: true,
       unique: true,
       trim: true,
-    }
+    },
+    menu: [{
+      type: Schema.Types.ObjectId,
+      ref: "Menu",
+      required: true,
+    }]
   },
   { timestamps: true },
   {
