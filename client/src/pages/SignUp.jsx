@@ -1,11 +1,9 @@
-import * as React from "react";
+import React, { useState } from "react";
 import {
   Avatar,
   Button,
   CssBaseline,
   TextField,
-  FormControlLabel,
-  Checkbox,
   Link,
   Grid,
   Box,
@@ -17,8 +15,10 @@ import {
 
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
-// TODO: pending signup - must receive admin approval for a new account to be active
-// TODO: admin would assign the new account a role (i.e. FOH or kitchen)
+import { useMutation } from "@apollo/client";
+import { SIGNUP } from "../utils/mutations";
+import Auth from "../utils/auth";
+import { validateEmail } from "../utils/helpers";
 
 function Copyright(props) {
   return (
@@ -37,13 +37,76 @@ function Copyright(props) {
 const theme = createTheme();
 
 export default function SignUp() {
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
+  const [signUpFormData, setSignUpFormData] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    username: "",
+    password: "",
+  });
+
+  const [errors, setErrors] = useState([]);
+
+  const [signUp, { error, data }] = useMutation(SIGNUP);
+
+  const validateInputs = () => {
+    const errors = [];
+
+    if (!signUpFormData.first_name) {
+      errors.push("Please enter your first name");
+    }
+
+    if (!signUpFormData.last_name) {
+      errors.push("Please enter your last name");
+    }
+
+    if (!signUpFormData.email) {
+      errors.push("Please enter your email");
+    } else if (!validateEmail(signUpFormData.email)) {
+      errors.push("Your email is not in a correct format.");
+    }
+
+    if (!signUpFormData.username) {
+      errors.push("Please enter your username");
+    }
+
+    if (!signUpFormData.password) {
+      errors.push("Please enter your password");
+    }
+
+    setErrors(errors);
+
+    // console.log('errors => ', errors)
+  };
+
+  const handleInputChange = (event) => {
+    
+    const { name, value } = event.target;
+    setSignUpFormData({
+      ...signUpFormData,
+      [name]: value,
     });
+
+    validateInputs();
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    try {
+      const { data } = await signUp({ 
+        variables: {
+          input: {...signUpFormData},
+        }
+      });
+
+      console.log('data from client/src/pages/SignUp.jsx', data);
+
+      const { token } = data.signup;
+      Auth.login(token)
+    } catch(err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -74,11 +137,13 @@ export default function SignUp() {
               <Grid item xs={12} sm={6}>
                 <TextField
                   autoComplete="given-name"
-                  name="firstName"
+                  name="first_name"
                   required
                   fullWidth
                   id="firstName"
                   label="First Name"
+                  value={signUpFormData.first_name}
+                  onChange={handleInputChange}
                   autoFocus
                 />
               </Grid>
@@ -88,7 +153,9 @@ export default function SignUp() {
                   fullWidth
                   id="lastName"
                   label="Last Name"
-                  name="lastName"
+                  value={signUpFormData.last_name}
+                  onChange={handleInputChange}
+                  name="last_name"
                   autoComplete="family-name"
                 />
               </Grid>
@@ -98,6 +165,8 @@ export default function SignUp() {
                   fullWidth
                   id="email"
                   label="Email Address"
+                  value={signUpFormData.email}
+                  onChange={handleInputChange}
                   name="email"
                   autoComplete="email"
                 />
@@ -106,23 +175,38 @@ export default function SignUp() {
                 <TextField
                   required
                   fullWidth
+                  id="username"
+                  label="username"
+                  value={signUpFormData.username}
+                  onChange={handleInputChange}
+                  name="username"
+                  autoComplete="new-username"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
                   name="password"
                   label="Password"
+                  value={signUpFormData.password}
+                  onChange={handleInputChange}
                   type="password"
                   id="password"
                   autoComplete="new-password"
                 />
               </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox value="allowExtraEmails" color="primary" />
-                  }
-                  label="I want to receive inspiration, marketing promotions and updates via email."
-                />
-              </Grid>
             </Grid>
             <Button
+            disabled={
+              !(
+                signUpFormData.first_name &&
+                signUpFormData.last_name &&
+                signUpFormData.email &&
+                signUpFormData.username &&
+                signUpFormData.password
+              )
+            }
               type="submit"
               fullWidth
               variant="contained"
@@ -132,7 +216,7 @@ export default function SignUp() {
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link href="/signin" variant="body2">
                   Already have an account? Sign in
                 </Link>
               </Grid>
@@ -140,6 +224,12 @@ export default function SignUp() {
           </Box>
         </Box>
         <Copyright sx={{ mt: 5 }} />
+        <Box sx={{mt: 2, color: 'red'}}>
+          {errors.length > 0 &&
+            errors.map((error, index) => {
+              return <Typography key={index}>{error}</Typography>;
+            })}
+        </Box>
       </Container>
     </ThemeProvider>
   );

@@ -1,29 +1,30 @@
-import decode from 'jwt-decode';
+import decode from "jwt-decode";
 
 class AuthService {
-    getProfile() {
-        
-    }
+  getProfile() {}
 
-    loggedIn() {
+  loggedIn() {
+    
+  }
 
-    }
+  isTokenExpired(token) {
 
-    isTokenExpired(token) {
+  }
 
-    }
+  getToken() {
+    return localStorage.getItem("id_token");
+  }
 
-    getToken() {
+  login(idToken) {
+    localStorage.setItem("id_token", idToken);
+    // TODO: to assign different user_role to different page after logging in
+    window.location.assign("/");
+  }
 
-    }
-
-    login(idToken) {
-
-    }
-
-    logout() {
-
-    }
+  logout() {
+    localStorage.removeItem("id_token");
+    window.location.assign("/signin");
+  }
 }
 
 export default new AuthService();

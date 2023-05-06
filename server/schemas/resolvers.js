@@ -33,7 +33,7 @@ const resolvers = {
 
         const { role, status } = context.user;
 
-        if(role !== "Admin" && status !== "active") {
+        if (role !== "Admin" && status !== "active") {
           throw new ForbiddenError("Unauthorized user");
         }
 
@@ -156,6 +156,25 @@ const resolvers = {
         throw error;
       }
     },
+    deleteUser: async (parent, { user_id }, context) => {
+      if (!context.user) {
+        throw new AuthenticationError("User is not logged in");
+      }
+
+      if (!user_id) {
+        throw new Error("Input value is empty");
+      }
+
+      const { role, status } = context.user;
+
+      if (role !== "Admin" && status !== "active") {
+        throw new ForbiddenError("Unauthorized user");
+      }
+
+      const delUser = await User.deleteOne({ _id: user_id });
+
+      return `Successfully deleted ${delUser.deletedCount} Order document`;
+    },
     login: async (parent, { email, password }, context) => {
       try {
         const user = await User.findOne({ email });
@@ -169,8 +188,6 @@ const resolvers = {
         }
 
         context.user = user;
-
-        console.log("context.user from login => ", context.user);
 
         const token = signToken(user);
         return { token, user };
@@ -266,7 +283,7 @@ const resolvers = {
           throw new Error("Input is blank");
         }
 
-        console.log('context.user from resolver =>', context.user)
+        console.log("context.user from resolver =>", context.user);
 
         const { status, role } = context.user;
 

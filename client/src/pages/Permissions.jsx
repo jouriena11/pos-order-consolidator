@@ -26,6 +26,9 @@ import {
 
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 
+// TODO: pending signup - must receive admin approval for a new account to be active
+// TODO: admin would assign the new account a role (i.e. FOH or kitchen)
+
 // function Row(props) {
 //   const { row } = props;
 //   const [open, setOpen] = useState(false);

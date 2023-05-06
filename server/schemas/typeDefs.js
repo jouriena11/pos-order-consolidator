@@ -61,6 +61,7 @@ const typeDefs = gql`
     updateProfile(input: ProfileUpdateInput!): User
     changePassword(currentPassword: String!, newPassword: String!): User
     updateUserStatusRole(input: UserRoleStatusUpdateInput!): User
+    deleteUser(user_id: ID!): String
     addMenuCategory(category_name: String!): MenuCategory
     updateMenuCategory(category_id: ID!, category_name: String!): MenuCategory
     deleteMenuCategory(category_id: ID!): String
