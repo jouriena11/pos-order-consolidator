@@ -15,6 +15,8 @@ import SignIn from "./SignIn";
 import SignUp from "./SignUp";
 import NavBar from "../components/AppBar";
 import POSOrderPage from "./POSOrderPage";
+import AddCategory from "./AddCategory";
+import AddMenu from "./AddMenu";
 import KitchenOrders from "./KitchenOrders";
 import Permissions from "./Permissions";
 
@@ -46,8 +48,7 @@ const mainTheme = createTheme({
   },
 });
 
-// TODO: default homepage for FOH user = POS Order page
-// TODO: default homepage for kitchen user = Kitchen Orders page
+// TODO: currently, menus are hidden from unauthorized user but unauthorized user can still access the page through URL
 
 function App() {
   return (
@@ -60,6 +61,8 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route element={<NavBar />}>
               <Route path="/pos" element={<POSOrderPage />} />
+              <Route path="/add-menu-category" element={< AddCategory/>} />
+              <Route path="/add-menu" element={< AddMenu/>} />
               <Route path="/kitchen-orders" element={<KitchenOrders />} />
               <Route path="/user-permissions" element={<Permissions />} />
             </Route>

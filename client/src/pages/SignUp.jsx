@@ -63,7 +63,7 @@ export default function SignUp() {
     if (!signUpFormData.email) {
       errors.push("Please enter your email");
     } else if (!validateEmail(signUpFormData.email)) {
-      errors.push("Your email is not in a correct format.");
+      errors.push("Your email is not in a correct format");
     }
 
     if (!signUpFormData.username) {

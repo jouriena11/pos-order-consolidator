@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, Outlet, Link } from "react-router-dom";
+import Auth from "../utils/auth";
 import {
   styled,
   alpha,
@@ -42,14 +43,13 @@ import NotificationsIcon from "@mui/icons-material/Notifications"; // notificati
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout"; // checkout icon
 import PendingActionsIcon from "@mui/icons-material/PendingActions"; // pending order icon
 import SoupKitchenIcon from "@mui/icons-material/SoupKitchen"; // Kitchen Orders icon
-import PointOfSaleIcon from "@mui/icons-material/PointOfSale"; // POS Order Page icon
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale"; // POS Order icon
 import KeyIcon from "@mui/icons-material/Key"; // Permissions icon
 
 import OrderSummaryDrawer from "./OrderSummary/OrderSummaryDrawer";
 
 // TODO: if OrderSummaryDrawer is open (i.e. on mobile screen), it should be automatically closed when a user tabs the hamburger icon
 // TODO: Also, 'Order Consolidator' title, the search bar, the 'pending order', and menu cards should be hidden, whereas the notification icon is pushed to the left
-// TODO: kitchen user (e.g. Chef) can only access Profile, Kitchen Orders, Report, and Log Out menu
 
 const drawerWidth = 240;
 const headerHeight = 64;
@@ -133,9 +133,11 @@ const MainDrawerMenu = [
     link: "#",
   },
   {
-    name: "POS Order Page",
+    name: "POS Order",
     icon: <PointOfSaleIcon />,
     link: "/pos",
+    requiredRole: ["Admin", "FOH Manager"],
+    requiredStatus: "active",
   },
   {
     name: "Profile",
@@ -154,25 +156,53 @@ const MainDrawerMenu = [
   {
     name: "Menu",
     subMenus: [
+      // {
+      //   name: "Category",
+      //   link: "/menu-category",
+      //   requiredRole: ["Admin", "FOH Manager"],
+      //   requiredStatus: "active",
+      // },
+      // {
+      //   name: "Menu",
+      //   link: "/menu",
+      //   requiredRole: ["Admin", "FOH Manager"],
+      //   requiredStatus: "active",
+      // },
       {
-        name: "Add New Menu",
+        name: "Add Menu Category",
+        link: "/add-menu-category",
+        requiredRole: ["Admin", "FOH Manager"],
+        requiredStatus: "active",
+      },
+      {
+        name: "Update/Delete Menu Category",
+        link: "/update-delete-menu-category",
+        requiredRole: ["Admin", "FOH Manager"],
+        requiredStatus: "active",
+      },
+      {
+        name: "Add Menu",
         link: "/add-menu",
+        requiredRole: ["Admin", "FOH Manager"],
+        requiredStatus: "active",
       },
       {
-        name: "Update Menu",
-        link: "/update-menu",
-      },
-      {
-        name: "Delete Menu",
-        link: "/delete-menu",
+        name: "Update/Delete Menu",
+        link: "/update-delete-menu",
+        requiredRole: ["Admin", "FOH Manager"],
+        requiredStatus: "active",
       },
     ],
     icon: <RestaurantIcon />,
+    requiredRole: ["Admin", "FOH Manager"],
+    requiredStatus: "active",
   },
   {
     name: "Kitchen Orders",
     icon: <SoupKitchenIcon />,
     link: "/kitchen-orders",
+    requiredRole: ["Admin", "Kitchen Manager"],
+    requiredStatus: "active",
   },
   {
     name: "Report",
@@ -191,6 +221,8 @@ const MainDrawerMenu2 = [
     name: "Permissions",
     icon: <KeyIcon />,
     link: "/user-permissions",
+    requiredRole: "Admin",
+    requiredStatus: "active",
   },
   {
     name: "Log out",
@@ -233,12 +265,10 @@ export default function NavBar() {
     }),
   }));
 
-  console.log(location);
-
   useEffect(() => {
     switch (location) {
       case "/pos":
-        setPageTitle("POS Order Page");
+        setPageTitle("POS Order");
         break;
       case "/kitchen-orders":
         setPageTitle("Kitchen Orders");
@@ -249,17 +279,26 @@ export default function NavBar() {
       case "/change-password":
         setPageTitle("Change Password");
         break;
+      case "/add-menu-category":
+        setPageTitle("Add Menu Category");
+        break;
+      case "/update-delete-menu-category":
+        setPageTitle("Update/Delete Menu Category");
+        break;
       case "/add-menu":
         setPageTitle("Add Menu");
         break;
-      case "/update-menu":
-        setPageTitle("Update Menu");
+      case "/update-delete-menu":
+        setPageTitle("Update/Delete Menu");
         break;
       case "/delete-menu":
         setPageTitle("Delete Menu");
         break;
       case "/order-status-report":
         setPageTitle("Order Status Report");
+        break;
+      case "/user-permissions":
+        setPageTitle("User Permissions");
         break;
       default:
         setPageTitle("/");
@@ -298,8 +337,8 @@ export default function NavBar() {
       {/* TODO: still don't understand the logic... of setOpenMenu(openMenu === index ? -1 : index) */}
       <List>
         {MainDrawerMenu.map((menu, index) => {
-          if (menu.subMenus) {
-            return (
+          return (menu.requiredRole && menu.requiredRole.includes(Auth.getRole())) || !menu.requiredRole ? 
+            (menu.subMenus ? (
               <div key={index}>
                 <ListItemButton
                   onClick={() => setOpenMenu(openMenu === index ? -1 : index)}
@@ -310,61 +349,74 @@ export default function NavBar() {
                 </ListItemButton>
                 <Collapse in={openMenu === index} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
-                    {menu.subMenus.map((subMenu, subIndex) => (
-                      <Link
-                        to={subMenu.link}
-                        style={{ color: "inherit", textDecoration: "none" }}
-                        onClick={() => {
-                          setOpen(false);
-                        }}
-                      >
-                        <ListItemButton key={subIndex} sx={{ pl: 9 }}>
-                          <ListItemText primary={subMenu.name} />
-                        </ListItemButton>
-                      </Link>
-                    ))}
+                    {menu.subMenus.map((subMenu, subIndex) =>
+                      (subMenu.requiredRole &&
+                        subMenu.requiredRole.includes(Auth.getRole())) ||
+                      !subMenu.requiredRole ? (
+                        <Link
+                          to={subMenu.link}
+                          style={{ color: "inherit", textDecoration: "none" }}
+                          onClick={() => {
+                            setOpen(false);
+                          }}
+                          key={subIndex}
+                        >
+                          <ListItemButton sx={{ pl: 9 }}>
+                            <ListItemText primary={subMenu.name} />
+                          </ListItemButton>
+                        </Link>
+                      ) : null
+                    )}
                   </List>
                 </Collapse>
               </div>
-            );
-          } else {
-            return (
+            ) : (
               <Link
                 to={menu.link}
                 style={{ color: "inherit", textDecoration: "none" }}
                 onClick={() => {
                   setOpen(false);
                 }}
+                key={index}
               >
-                <ListItemButton key={index}>
+                <ListItemButton>
                   <ListItemIcon>{menu.icon}</ListItemIcon>
                   <ListItemText primary={menu.name} />
                 </ListItemButton>
               </Link>
-            );
-          }
+            )
+          ) : null;
         })}
       </List>
 
       <Divider />
-
       <List>
-        {MainDrawerMenu2.map((menu, index) => (
-          <Link
-            to={menu.link}
-            style={{ color: "inherit", textDecoration: "none" }}
-            onClick={() => {
-              setOpen(false);
-            }}
-          >
-            <ListItem key={index} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>{menu.icon}</ListItemIcon>
-                <ListItemText primary={menu.name} />
-              </ListItemButton>
-            </ListItem>
-          </Link>
-        ))}
+        <List>
+          {MainDrawerMenu2.map((menu, index) =>
+            (menu.requiredRole && Auth.getRole() === menu.requiredRole) ||
+            !menu.requiredRole ? (
+              <ListItem disablePadding key={index}>
+                {menu.link ? (
+                  <Link
+                    to={menu.link}
+                    style={{ color: "inherit", textDecoration: "none" }}
+                    onClick={() => setOpen(false)}
+                  >
+                    <ListItemButton>
+                      <ListItemIcon>{menu.icon}</ListItemIcon>
+                      <ListItemText primary={menu.name} />
+                    </ListItemButton>
+                  </Link>
+                ) : (
+                  <ListItemButton onClick={() => Auth.logout()}>
+                    <ListItemIcon>{menu.icon}</ListItemIcon>
+                    <ListItemText primary={menu.name} />
+                  </ListItemButton>
+                )}
+              </ListItem>
+            ) : null
+          )}
+        </List>
       </List>
     </>
   );

@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "img": "../client/src/assets/img/menu-salad-caesar.jpg",
+    "name": "Caesar Salad",
+    "price": "$14.90",
+    "category": "Salad"
+  },
+  {
+    "id": 2,
+    "img": "../client/src/assets/img/menu-salad-rocket.jpg",
+    "name": "Rocket Salad",
+    "price": "$14.90",
+    "category": "Salad"
+  },
+  {
+    "id": 3,
+    "img": "../client/src/assets/img/menu-salad-berry-rhapsody.jpg",
+    "name": "Berry Rhapsody Salad",
+    "price": "$16.90",
+    "category": "Salad"
+  },
+  {
+    "id": 4,
+    "img": "../client/src/assets/img/menu-toast-avocado-strawberry.jpg",
+    "name": "Berries Avocado Toast",
+    "price": "$18.90",
+    "category": "Toast"
+  },
+  {
+    "id": 5,
+    "img": "../client/src/assets/img/menu-toast-margherita-pepperoni.jpg",
+    "name": "Pepperoni Margherita Toast",
+    "price": "$14.90",
+    "category": "Toast"
+  }
+]

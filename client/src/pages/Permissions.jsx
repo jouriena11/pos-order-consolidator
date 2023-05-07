@@ -1,232 +1,278 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useMutation, useQuery } from "@apollo/client";
+import { GET_USERS } from "../utils/queries";
+import { UPDATE_USER_ROLE_STATUS } from "../utils/mutations";
+import Auth from "../utils/auth";
 
 import {
-  Box,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
-  TableSortLabel,
-  Toolbar,
-  FormControlLabel,
-  Switch,
-  Typography,
   Tooltip,
+  Typography,
   IconButton,
-  Checkbox,
   Paper,
-  Collapse,
   MenuItem,
-  FormControl,
   Select,
+  Checkbox,
+  Snackbar,
 } from "@mui/material";
+
+import MuiAlert from "@mui/material/Alert";
 
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 
-// TODO: pending signup - must receive admin approval for a new account to be active
-// TODO: admin would assign the new account a role (i.e. FOH or kitchen)
+function SaveNotification(notificationMsg) {
+  const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
 
-// function Row(props) {
-//   const { row } = props;
-//   const [open, setOpen] = useState(false);
-//   const [cookingStatus, setCookingStatus] = useState("On Queue");
+  const [openNotification, setOpenNotification] = useState(false);
 
-//   const handleChange = (event) => {
-//     setCookingStatus(event.target.value);
-//   };
+  const handleClick = () => {
+    setOpenNotification(true);
+  };
 
-//   const selectBgColor = (status) => {
-//     switch (status) {
-//       case "Cooking":
-//         return { sx: { backgroundColor: "#ffcc80" } };
-//       case "Ready":
-//         return { sx: { backgroundColor: "#4dd0e1" } };
-//       case "Cancelled":
-//         return { sx: { backgroundColor: "darkgrey" } };
-//       default:
-//         return { sx: { backgroundColor: "#ff8a80" } };
-//     }
-//   };
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
 
-//   const statusColor = selectBgColor(cookingStatus);
+    setOpenNotification(false);
+  };
 
-//   return (
-//     <>
-//       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-//         <TableCell>
-//           <IconButton
-//             aria-label="expand row"
-//             size="small"
-//             onClick={() => setOpen(!open)}
-//           >
-//             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-//           </IconButton>
-//         </TableCell>
-//         <TableCell align="center" component="th" scope="row">
-//           {row.name}
-//         </TableCell>
-//         <TableCell align="center">{row.calories}</TableCell>
-//         <TableCell align="center">{row.fat}</TableCell>
-//         <TableCell align="center">
-//           {/* Status dropdown */}
-//           <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-//             <Select
-//               labelId={cookingStatus}
-//               id={cookingStatus.split(" ").join("-").toLowerCase()}
-//               value={cookingStatus}
-//               onChange={handleChange}
-//               sx={statusColor.sx}
-//             >
-//               <MenuItem value="On Queue">On Queue</MenuItem>
-//               <MenuItem value="Cooking">Cooking</MenuItem>
-//               <MenuItem value="Ready">Ready</MenuItem>
-//               <MenuItem value="Cancelled">Cancelled</MenuItem>
-//             </Select>
-//           </FormControl>
-//         </TableCell>
-//         <TableCell align="center">
-//           <Tooltip title="Select order to update" arrow placement="top">
-//             {/* TODO: to apply parent-child checkbox */}
-//             <Checkbox
-//               label="parent"
-//               defaultChecked
-//               sx={{
-//                 color: "grey",
-//                 "&.Mui-checked": {
-//                   color: "grey",
-//                 },
-//               }}
-//               // indeterminate={numSelected > 0 && numSelected < rowCount}
-//               // checked={rowCount > 0 && numSelected === rowCount}
-//               // onChange={onSelectAllClick}
-//               inputProps={{
-//                 "aria-label": "select all orders",
-//               }}
-//             />
-//           </Tooltip>
-//         </TableCell>
-//         <TableCell align="center">
-//           <Tooltip title="Save status change" arrow placement="top">
-//             <IconButton sx={{ color: "grey" }}>
-//               {/* TODO: `cancelled` and `ready` status Select component should be deactivated once selected and saved  */}
-//               <SaveRoundedIcon />
-//             </IconButton>
-//           </Tooltip>
-//         </TableCell>
-//       </TableRow>
-//       <TableRow>
-//         <TableCell style={{ padding: 0 }} colSpan={7}>
-//           <Collapse in={open} timeout="auto" unmountOnExit>
-//             <Box sx={{ margin: 1 }}>
-//               <Table size="small" aria-label="purchases">
-//                 <TableHead>
-//                   <TableRow>
-//                     <TableCell width={100} />
-//                     <TableCell sx={{ fontWeight: 700 }} align="center">
-//                       Order ID
-//                     </TableCell>
-//                     <TableCell sx={{ fontWeight: 700 }} align="center">
-//                       Time of Order
-//                     </TableCell>
-//                     <TableCell sx={{ fontWeight: 700 }} align="center">
-//                       Time Elapsed
-//                     </TableCell>
-//                     <TableCell sx={{ fontWeight: 700 }} align="center">
-//                       Servings
-//                     </TableCell>
-//                     <TableCell />
-//                     <TableCell />
-//                   </TableRow>
-//                 </TableHead>
-//                 {/* TODO: still can't get the children table columns to align with the parent's  */}
-//                 <TableBody>
-//                   {row.history.map((historyRow) => (
-//                     <TableRow key={historyRow.date}>
-//                       <TableCell width={100} />
-//                       <TableCell align="center" component="th" scope="row">
-//                         {/* TODO: to change value */}
-//                         {historyRow.date}
-//                       </TableCell>
-//                       <TableCell align="center">
-//                         {/* TODO: to change value */}
-//                         {historyRow.customerId}
-//                       </TableCell>
-//                       <TableCell align="center">{historyRow.amount}</TableCell>
-//                       <TableCell align="center">
-//                         {/* TODO: to change value */}
-//                         {Math.round(historyRow.amount * row.price * 100) / 100}
-//                       </TableCell>
-//                       <TableCell align="center">
-//                         <Checkbox
-//                           defaultChecked
-//                           sx={{
-//                             color: "grey",
-//                             "&.Mui-checked": {
-//                               color: "grey",
-//                             },
-//                           }}
-//                           inputProps={{
-//                             "aria-label": "select all orders",
-//                           }}
-//                         />
-//                       </TableCell>
-//                       <TableCell />
-//                     </TableRow>
-//                   ))}
-//                 </TableBody>
-//               </Table>
-//             </Box>
-//           </Collapse>
-//         </TableCell>
-//       </TableRow>
-//     </>
-//   );
-// }
+  return (
+    <Snackbar
+      open={openNotification}
+      autoHideDuration={3000}
+      onClose={handleClose}
+    >
+      <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
+        {notificationMsg}
+      </Alert>
+    </Snackbar>
+  );
+}
+
+function Users(props) {
+  const { user } = props;
+  const [userRole, setUserRole] = useState(user.role);
+  const [userStatus, setUserStatus] = useState(user.status);
+  const [userChecked, setUserCheked] = useState(false);
+
+  const handleChangeRole = (event) => {
+    setUserRole(event.target.value);
+  };
+
+  const handleChangeStatus = (event) => {
+    setUserStatus(event.target.value);
+  };
+
+  const handleCheckboxChange = (event) => {
+    setUserCheked((prevState) => !prevState);
+  };
+
+  const selectBgColor = (status) => {
+    switch (status) {
+      case "pending":
+        return { sx: { backgroundColor: "#ffcc80" } };
+      case "active":
+        return { sx: { backgroundColor: "#4dd0e1" } };
+      case "inactive":
+        return { sx: { backgroundColor: "darkgrey" } };
+      default:
+        return { sx: { backgroundColor: "#ff8a80" } };
+    }
+  };
+
+  const statusColor = selectBgColor(userStatus);
+
+  const [updateUser, { loading, data }] = useMutation(UPDATE_USER_ROLE_STATUS);
+
+  const token = Auth.loggedIn() ? Auth.getToken() : null;
+
+  const handleSaveButtonClick = async () => {
+    try {
+      await updateUser({
+        variables: {
+          input: {
+            user_id: user._id,
+            user_status: userStatus,
+            user_role: userRole,
+          },
+        },
+        // only Admin can 'save' changes to user data
+        context: { 
+          headers: {
+            authorization: token ? `Bearer ${token}` : "",
+          },
+        },
+      });
+      setUserCheked();
+
+      const notificationMsg = `${user.username}'s data has been updated`;
+      SaveNotification(notificationMsg);
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <>
+    {/* TODO: Snackbar is not showing */}
+    {SaveNotification()}
+      <TableRow>
+        <TableCell align="center">
+          <Typography variant="body2">{user.first_name}</Typography>
+        </TableCell>
+        <TableCell align="center">
+          <Typography variant="body2">{user.last_name}</Typography>
+        </TableCell>
+        <TableCell align="center">
+          <Typography variant="body2">{user.username}</Typography>
+        </TableCell>
+        <TableCell align="center">
+          <Typography variant="body2">{user.email}</Typography>
+        </TableCell>
+        <TableCell align="center">
+          {user.role === "Admin" ? (
+            <Typography variant="body2">{user.role}</Typography>
+          ) : (
+            <Select
+              value={userRole}
+              onChange={handleChangeRole}
+              size="small"
+              sx={{ width: "170px" }}
+            >
+              <MenuItem value="TBA">
+                <Typography variant="body2">To be assigned</Typography>
+              </MenuItem>
+              <MenuItem value="FOH Manager">
+                <Typography variant="body2">FOH Manager</Typography>
+              </MenuItem>
+              <MenuItem value="Kitchen Manager">
+                <Typography variant="body2">Kitchen Manager</Typography>
+              </MenuItem>
+            </Select>
+          )}
+        </TableCell>
+        <TableCell align="center">
+          {user.role === "Admin" ? (
+            <Typography variant="body2">{user.status}</Typography>
+          ) : (
+            <Select
+              value={userStatus}
+              onChange={handleChangeStatus}
+              size="small"
+              sx={{ width: "130px", ...statusColor.sx }}
+            >
+              <MenuItem value="pending">
+                <Typography variant="body2">pending</Typography>
+              </MenuItem>
+              <MenuItem value="active">
+                <Typography variant="body2">active</Typography>
+              </MenuItem>
+              <MenuItem value="inactive">
+                <Typography variant="body2">inactive</Typography>
+              </MenuItem>
+            </Select>
+          )}
+        </TableCell>
+        <TableCell align="center">
+          <Tooltip title="Select order to update" arrow placement="top">
+            <Checkbox
+              checked={userChecked}
+              onChange={handleCheckboxChange}
+              label="parent"
+              sx={{
+                color: "grey",
+                "&.Mui-checked": {
+                  color: "grey",
+                },
+              }}
+              // onChange={onSelectAllClick}
+              inputProps={{
+                "aria-label": "select user to update",
+              }}
+            />
+          </Tooltip>
+        </TableCell>
+        <TableCell align="center">
+          <Tooltip title="Save status change" arrow placement="top">
+            <IconButton
+              sx={{ color: "grey" }}
+              onClick={handleSaveButtonClick}
+              disabled={!userChecked}
+            >
+              <SaveRoundedIcon />
+            </IconButton>
+          </Tooltip>
+        </TableCell>
+      </TableRow>
+    </>
+  );
+}
 
 export default function Permissions() {
+  const { loading, data: usersList } = useQuery(GET_USERS);
+
+  useEffect(() => {
+    if (loading) {
+      console.log("Loading...");
+    } else {
+      // console.log("usersList.getUsers from Permissions => ", usersList.getUsers);
+      // console.log("Loading completed")
+    }
+  }, [usersList]);
+
   return (
     <TableContainer component={Paper}>
-      <Table aria-label="collapsible table">
+      <Table aria-label="Users Management Table">
         <TableHead>
           <TableRow>
-            <TableCell width={100} />
             <TableCell align="center" sx={{ fontWeight: 700 }}>
-              <Tooltip title="Ordered Menu" placement="top" arrow>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  Menu
-                </Typography>
-              </Tooltip>
-            </TableCell>
-
-            <TableCell align="center" sx={{ fontWeight: 700 }}>
-              <Tooltip
-                title="Elapsed time since first order"
-                arrow
-                placement="top"
-              >
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  Time Elapsed&nbsp;(min)
-                </Typography>
-              </Tooltip>
-            </TableCell>
-
-            <TableCell align="center" sx={{ fontWeight: 700 }}>
-              Total Servings
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                First Name
+              </Typography>
             </TableCell>
             <TableCell align="center" sx={{ fontWeight: 700 }}>
-              Cooking Status
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                Last Name
+              </Typography>
             </TableCell>
-            <TableCell />
-            <TableCell />
+            <TableCell align="center" sx={{ fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                Username
+              </Typography>
+            </TableCell>
+            <TableCell align="center" sx={{ fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                Email
+              </Typography>
+            </TableCell>
+            <TableCell align="center" sx={{ fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                Role
+              </Typography>
+            </TableCell>
+            <TableCell align="center" sx={{ fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                Status
+              </Typography>
+            </TableCell>
+            <TableCell align="center" />
+            <TableCell align="center" />
           </TableRow>
         </TableHead>
         <TableBody>
-          {/* {rows.map((row) => (
-              <Row key={row.name} row={row} />
-            ))} */}
+          {usersList &&
+            usersList.getUsers.map((user) => (
+              <Users key={user._id} user={user} />
+            ))}
         </TableBody>
       </Table>
     </TableContainer>
