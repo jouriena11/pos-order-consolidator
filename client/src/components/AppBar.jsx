@@ -130,7 +130,7 @@ const MainDrawerMenu = [
   {
     name: "Dashboard",
     icon: <SpaceDashboardIcon />,
-    link: "#",
+    link: "/dashboard",
   },
   {
     name: "POS Order",

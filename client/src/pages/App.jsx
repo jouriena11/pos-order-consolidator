@@ -14,11 +14,15 @@ import "@fontsource/karla";
 import SignIn from "./SignIn";
 import SignUp from "./SignUp";
 import NavBar from "../components/AppBar";
+import Dashboard from "./Dashboard";
+import OrderStatus from "./Reports/OrderStatus";
 import POSOrderPage from "./POSOrderPage";
-import AddCategory from "./AddCategory";
-import AddMenu from "./AddMenu";
+import AddCategory from "./Menu/AddCategory";
+import AddMenu from "./Menu/AddMenu";
 import KitchenOrders from "./KitchenOrders";
 import Permissions from "./Permissions";
+import ProfileUpdate from "./Profile/ProfileUpdate";
+import ChangePassword from "./Profile/ChangePassword";
 
 const httpLink = createHttpLink({
   uri: process.env.REACT_APP_GRAPHQL_SERVER,
@@ -60,10 +64,14 @@ function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route element={<NavBar />}>
+            <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/pos" element={<POSOrderPage />} />
+              <Route path="/update-profile" element={<ProfileUpdate />} />
+              <Route path="/change-password" element={<ChangePassword />} />
               <Route path="/add-menu-category" element={< AddCategory/>} />
               <Route path="/add-menu" element={< AddMenu/>} />
               <Route path="/kitchen-orders" element={<KitchenOrders />} />
+              <Route path="/order-status-report" element={<OrderStatus />} />
               <Route path="/user-permissions" element={<Permissions />} />
             </Route>
           </Routes>

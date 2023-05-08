@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useMutation } from "@apollo/client";
-import { ADD_MENU_CATEGORY } from "../utils/mutations";
-import Auth from "../utils/auth";
+import { ADD_MENU_CATEGORY } from "../../utils/mutations";
+import Auth from "../../utils/auth";
 
 import {
   Button,
@@ -24,7 +24,7 @@ export default function AddCategory() {
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setAddCategoryFormData({ ...addCategoryFormData, [name]: value });
+    setAddCategoryFormData(value);
   };
 
   const handleSubmit = async (event) => {
@@ -37,7 +37,7 @@ export default function AddCategory() {
     try {
       const { data } = await addMenuCategory({
         variables: {
-          categoryName: addCategoryFormData.name,
+          categoryName: addCategoryFormData,
         },
         context: {
             headers: {
@@ -46,7 +46,6 @@ export default function AddCategory() {
         },
       });
       
-      // TODO: bug fix - input value persists
       setAddCategoryFormData("");
 
       //   TODO: to invoke a notification modal, confirming to user that a new category has been created?
@@ -86,7 +85,7 @@ export default function AddCategory() {
                 id="new-menu-category-name"
                 label="Enter a Menu Category name"
                 name="name"
-                value={addCategoryFormData.name}
+                value={addCategoryFormData}
                 onChange={handleInputChange}
                 autoComplete="New Menu Category"
                 autoFocus

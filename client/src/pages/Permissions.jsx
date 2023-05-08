@@ -25,22 +25,21 @@ import MuiAlert from "@mui/material/Alert";
 
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 
-function SaveNotification(notificationMsg) {
-  const Alert = React.forwardRef(function Alert(props, ref) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-  });
+function SaveNotification(props) {
+  // const Alert = React.forwardRef(function Alert(props, ref) {
+  //   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  // });
 
-  const [openNotification, setOpenNotification] = useState(false);
-
+  const { notiMsg , openNoti } = props;
+  const [openNotification, setOpenNotification] = useState(openNoti);
+  console.log(notiMsg, openNoti);
   const handleClick = () => {
     setOpenNotification(true);
   };
-
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
-
     setOpenNotification(false);
   };
 
@@ -49,16 +48,17 @@ function SaveNotification(notificationMsg) {
       open={openNotification}
       autoHideDuration={3000}
       onClose={handleClose}
+      message={notiMsg}
     >
-      <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
-        {notificationMsg}
-      </Alert>
+      {/* <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
+        {notiMsg}
+      </Alert> */}
     </Snackbar>
   );
 }
 
 function Users(props) {
-  const { user } = props;
+  const { user, setNoti } = props;
   const [userRole, setUserRole] = useState(user.role);
   const [userStatus, setUserStatus] = useState(user.status);
   const [userChecked, setUserCheked] = useState(false);
@@ -105,16 +105,14 @@ function Users(props) {
           },
         },
         // only Admin can 'save' changes to user data
-        context: { 
+        context: {
           headers: {
             authorization: token ? `Bearer ${token}` : "",
           },
         },
       });
       setUserCheked();
-
-      const notificationMsg = `${user.username}'s data has been updated`;
-      SaveNotification(notificationMsg);
+      setNoti(true, `"${user.username}'s data has been updated"`);
 
     } catch (err) {
       console.error(err);
@@ -122,103 +120,101 @@ function Users(props) {
   };
 
   return (
-    <>
-    {/* TODO: Snackbar is not showing */}
-    {SaveNotification()}
-      <TableRow>
-        <TableCell align="center">
-          <Typography variant="body2">{user.first_name}</Typography>
-        </TableCell>
-        <TableCell align="center">
-          <Typography variant="body2">{user.last_name}</Typography>
-        </TableCell>
-        <TableCell align="center">
-          <Typography variant="body2">{user.username}</Typography>
-        </TableCell>
-        <TableCell align="center">
-          <Typography variant="body2">{user.email}</Typography>
-        </TableCell>
-        <TableCell align="center">
-          {user.role === "Admin" ? (
-            <Typography variant="body2">{user.role}</Typography>
-          ) : (
-            <Select
-              value={userRole}
-              onChange={handleChangeRole}
-              size="small"
-              sx={{ width: "170px" }}
-            >
-              <MenuItem value="TBA">
-                <Typography variant="body2">To be assigned</Typography>
-              </MenuItem>
-              <MenuItem value="FOH Manager">
-                <Typography variant="body2">FOH Manager</Typography>
-              </MenuItem>
-              <MenuItem value="Kitchen Manager">
-                <Typography variant="body2">Kitchen Manager</Typography>
-              </MenuItem>
-            </Select>
-          )}
-        </TableCell>
-        <TableCell align="center">
-          {user.role === "Admin" ? (
-            <Typography variant="body2">{user.status}</Typography>
-          ) : (
-            <Select
-              value={userStatus}
-              onChange={handleChangeStatus}
-              size="small"
-              sx={{ width: "130px", ...statusColor.sx }}
-            >
-              <MenuItem value="pending">
-                <Typography variant="body2">pending</Typography>
-              </MenuItem>
-              <MenuItem value="active">
-                <Typography variant="body2">active</Typography>
-              </MenuItem>
-              <MenuItem value="inactive">
-                <Typography variant="body2">inactive</Typography>
-              </MenuItem>
-            </Select>
-          )}
-        </TableCell>
-        <TableCell align="center">
-          <Tooltip title="Select order to update" arrow placement="top">
-            <Checkbox
-              checked={userChecked}
-              onChange={handleCheckboxChange}
-              label="parent"
-              sx={{
+    <TableRow>
+      <TableCell align="center">
+        <Typography variant="body2">{user.first_name}</Typography>
+      </TableCell>
+      <TableCell align="center">
+        <Typography variant="body2">{user.last_name}</Typography>
+      </TableCell>
+      <TableCell align="center">
+        <Typography variant="body2">{user.username}</Typography>
+      </TableCell>
+      <TableCell align="center">
+        <Typography variant="body2">{user.email}</Typography>
+      </TableCell>
+      <TableCell align="center">
+        {user.role === "Admin" ? (
+          <Typography variant="body2">{user.role}</Typography>
+        ) : (
+          <Select
+            value={userRole}
+            onChange={handleChangeRole}
+            size="small"
+            sx={{ width: "170px" }}
+          >
+            <MenuItem value="TBA">
+              <Typography variant="body2">To be assigned</Typography>
+            </MenuItem>
+            <MenuItem value="FOH Manager">
+              <Typography variant="body2">FOH Manager</Typography>
+            </MenuItem>
+            <MenuItem value="Kitchen Manager">
+              <Typography variant="body2">Kitchen Manager</Typography>
+            </MenuItem>
+          </Select>
+        )}
+      </TableCell>
+      <TableCell align="center">
+        {user.role === "Admin" ? (
+          <Typography variant="body2">{user.status}</Typography>
+        ) : (
+          <Select
+            value={userStatus}
+            onChange={handleChangeStatus}
+            size="small"
+            sx={{ width: "130px", ...statusColor.sx }}
+          >
+            <MenuItem value="pending">
+              <Typography variant="body2">pending</Typography>
+            </MenuItem>
+            <MenuItem value="active">
+              <Typography variant="body2">active</Typography>
+            </MenuItem>
+            <MenuItem value="inactive">
+              <Typography variant="body2">inactive</Typography>
+            </MenuItem>
+          </Select>
+        )}
+      </TableCell>
+      <TableCell align="center">
+        <Tooltip title="Select order to update" arrow placement="top">
+          <Checkbox
+            checked={userChecked}
+            onChange={handleCheckboxChange}
+            label="parent"
+            sx={{
+              color: "grey",
+              "&.Mui-checked": {
                 color: "grey",
-                "&.Mui-checked": {
-                  color: "grey",
-                },
-              }}
-              // onChange={onSelectAllClick}
-              inputProps={{
-                "aria-label": "select user to update",
-              }}
-            />
-          </Tooltip>
-        </TableCell>
-        <TableCell align="center">
-          <Tooltip title="Save status change" arrow placement="top">
-            <IconButton
-              sx={{ color: "grey" }}
-              onClick={handleSaveButtonClick}
-              disabled={!userChecked}
-            >
-              <SaveRoundedIcon />
-            </IconButton>
-          </Tooltip>
-        </TableCell>
-      </TableRow>
-    </>
+              },
+            }}
+            // onChange={onSelectAllClick}
+            inputProps={{
+              "aria-label": "select user to update",
+            }}
+          />
+        </Tooltip>
+      </TableCell>
+      <TableCell align="center">
+        <Tooltip title="Save status change" arrow placement="top">
+          <IconButton
+            sx={{ color: "grey" }}
+            onClick={handleSaveButtonClick}
+            disabled={!userChecked}
+          >
+            <SaveRoundedIcon />
+          </IconButton>
+        </Tooltip>
+      </TableCell>
+    </TableRow>
   );
 }
 
 export default function Permissions() {
   const { loading, data: usersList } = useQuery(GET_USERS);
+  const [notiMsg, setNotiMsg] = useState("");
+  const [openNoti, setOpenNoti] = useState(false);
 
   useEffect(() => {
     if (loading) {
@@ -230,51 +226,59 @@ export default function Permissions() {
   }, [usersList]);
 
   return (
-    <TableContainer component={Paper}>
-      <Table aria-label="Users Management Table">
-        <TableHead>
-          <TableRow>
-            <TableCell align="center" sx={{ fontWeight: 700 }}>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                First Name
-              </Typography>
-            </TableCell>
-            <TableCell align="center" sx={{ fontWeight: 700 }}>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                Last Name
-              </Typography>
-            </TableCell>
-            <TableCell align="center" sx={{ fontWeight: 700 }}>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                Username
-              </Typography>
-            </TableCell>
-            <TableCell align="center" sx={{ fontWeight: 700 }}>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                Email
-              </Typography>
-            </TableCell>
-            <TableCell align="center" sx={{ fontWeight: 700 }}>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                Role
-              </Typography>
-            </TableCell>
-            <TableCell align="center" sx={{ fontWeight: 700 }}>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                Status
-              </Typography>
-            </TableCell>
-            <TableCell align="center" />
-            <TableCell align="center" />
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {usersList &&
-            usersList.getUsers.map((user) => (
-              <Users key={user._id} user={user} />
-            ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <>
+      <TableContainer component={Paper}>
+        <Table aria-label="Users Management Table">
+          <TableHead>
+            <TableRow>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  First Name
+                </Typography>
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  Last Name
+                </Typography>
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  Username
+                </Typography>
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  Email
+                </Typography>
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  Role
+                </Typography>
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  Status
+                </Typography>
+              </TableCell>
+              <TableCell align="center" />
+              <TableCell align="center" />
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {usersList &&
+              usersList.getUsers.map((user) => (
+                <Users key={user._id} user={user} setNoti={(openStatus, msg) => { 
+                  console.log(openStatus, msg);
+                  setNotiMsg(msg); 
+                  setOpenNoti(openStatus); 
+                }} />
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      {/* TODO: Snackbar is not showing */}
+      <SaveNotification notiMsg={notiMsg} openNoti={openNoti}/>
+    </>
   );
 }

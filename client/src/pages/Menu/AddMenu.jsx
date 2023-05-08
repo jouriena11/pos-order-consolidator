@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@apollo/client";
-import { ADD_MENU } from "../utils/mutations";
-import Auth from "../utils/auth";
-import { GET_MENU_CATEGORIES } from "../utils/queries";
+import { ADD_MENU } from "../../utils/mutations";
+import Auth from "../../utils/auth";
+import { GET_MENU_CATEGORIES } from "../../utils/queries";
 
 import {
   Button,
@@ -34,8 +34,7 @@ export default function AddMenu() {
   });
 
   const [nameError, setNameError] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  
+
   const { loading, data: menuCategoriesList } = useQuery(GET_MENU_CATEGORIES);
   const [addMenu, { error, data }] = useMutation(ADD_MENU);
 
@@ -43,13 +42,16 @@ export default function AddMenu() {
     if (loading) {
       console.log("Loading...");
     } else {
-      console.log("menuCategoriesList.getMenuCategories => ", menuCategoriesList.getMenuCategories);
+      console.log(
+        "menuCategoriesList.getMenuCategories => ",
+        menuCategoriesList.getMenuCategories
+      );
     }
   }, [menuCategoriesList]);
 
   const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setAddMenuFormData({ ...addMenuFormData, [name]: value });
+    const { name, value, type } = event.target;
+      setAddMenuFormData({ ...addMenuFormData, [name]: type === 'number'? Number(value) : value });
   };
 
   const handleSubmit = async (event) => {
@@ -68,9 +70,11 @@ export default function AddMenu() {
     try {
       const { data } = await addMenu({
         variables: {
-          name: addMenuFormData.name,
-          price: addMenuFormData.price,
-          category_id: addMenuFormData.category_id
+          input: {
+            name: addMenuFormData.name,
+            price: addMenuFormData.price,
+            category_id: addMenuFormData.category_id,
+          }
         },
         context: {
           headers: {
@@ -87,7 +91,8 @@ export default function AddMenu() {
   };
 
   const handleCategorySelect = (event) => {
-    setSelectedCategory(event.target.value)
+    console.log(event.target.value); // "ABC"
+    setAddMenuFormData({ ...addMenuFormData, category_id: event.target.value });
   };
 
   const fieldLabelWidth = "100px";
@@ -179,18 +184,19 @@ export default function AddMenu() {
                     labelId="category-label"
                     id="category-select"
                     name="category_id"
-                    value={addMenuFormData.name}
+                    value={addMenuFormData.category_id}
                     onChange={handleCategorySelect}
                     required
                   >
                     {menuCategoriesList &&
                       menuCategoriesList.getMenuCategories.map((category) => (
-                        <MenuItem key={category._id} value={category.name}>
+                        <MenuItem key={category._id} value={category._id}>
                           {category.name}
                         </MenuItem>
                       ))}
                   </Select>
                 </FormControl>
+
                 {/* TODO: error message */}
               </Box>
               <Box display={"flex"} justifyContent={"flex-end"}>

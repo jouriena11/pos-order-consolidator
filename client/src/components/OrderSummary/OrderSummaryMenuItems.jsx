@@ -1,16 +1,14 @@
 import React, { useState } from "react";
 
-import {
-  IconButton,
-  Box,
-  Typography,
-} from "@mui/material";
+import { IconButton, Box, Typography } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 
+// TODO: to pass props from MenuCard
 export default function OrderSummaryMenuItems(props) {
-  
+  const { menu, price } = props;
+
   // Qty +/- box
   const QtyControl = () => {
     const [count, setCount] = useState(0);
@@ -72,6 +70,7 @@ export default function OrderSummaryMenuItems(props) {
     >
       <Box sx={{ flexGrow: 1, maxWidth: "60%" }}>
         <Typography variant="body1" sx={{ wordWrap: "break-word" }}>
+          {/* {menu} */}
           Menu
         </Typography>
         <Box
@@ -82,7 +81,10 @@ export default function OrderSummaryMenuItems(props) {
             my: 1,
           }}
         >
-          <Typography variant="body2">$18.90</Typography>
+          <Typography variant="body2">
+            {/* {price} */}
+            $18.90
+          </Typography>
         </Box>
       </Box>
       <Box sx={{ flexGrow: 1 }}></Box>

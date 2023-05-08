@@ -22,8 +22,6 @@ import {
 
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
-// TODO: to incorporate React validator (ref: personal portfolio)
-
 function Copyright(props) {
   return (
     <Typography
