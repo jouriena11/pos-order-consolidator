@@ -22,14 +22,10 @@ import {
 
 const theme = createTheme();
 
-function Menu() {
-  return <></>;
-}
-
 export default function AddMenu() {
   const [addMenuFormData, setAddMenuFormData] = useState({
     name: "",
-    price: 0,
+    price: "",
     category_id: "",
   });
 
@@ -51,7 +47,8 @@ export default function AddMenu() {
 
   const handleInputChange = (event) => {
     const { name, value, type } = event.target;
-      setAddMenuFormData({ ...addMenuFormData, [name]: type === 'number'? Number(value) : value });
+    let newValue = type === "number" && value !== "" ? Number(parseFloat(value).toFixed(2)) : value;
+    setAddMenuFormData({ ...addMenuFormData, [name]: newValue });
   };
 
   const handleSubmit = async (event) => {
@@ -65,7 +62,7 @@ export default function AddMenu() {
 
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
-    console.log("addMenuFormData => ", addMenuFormData);
+    // console.log("addMenuFormData => ", addMenuFormData);
 
     try {
       const { data } = await addMenu({
@@ -74,7 +71,7 @@ export default function AddMenu() {
             name: addMenuFormData.name,
             price: addMenuFormData.price,
             category_id: addMenuFormData.category_id,
-          }
+          },
         },
         context: {
           headers: {
@@ -82,9 +79,16 @@ export default function AddMenu() {
           },
         },
       });
+      
+      setAddMenuFormData({
+        name: "",
+        price: "",
+        category_id: "",
+      });
 
-      //   TODO: to invoke a notification modal, confirming to user that a new menu has been created?
-      console.log("data from client/src/pages/AddMenu.jsx", data);
+      // TODO: to replace alert with MUI Snackbar
+      alert("New menu has been created")
+      // console.log("data from client/src/pages/AddMenu.jsx", data);
     } catch (err) {
       console.error(err);
     }

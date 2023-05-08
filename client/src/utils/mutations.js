@@ -148,19 +148,21 @@ export const DELETE_MENU = gql`
 `;
 
 export const SUBMIT_ORDER = gql`
-  mutation SubmitOrder {
-    submitOrder {
-      _id
-      order_status
-      customer_name
-      cooking_status
-      menu_items {
-        menu
-        order_qty
-      }
-      total
+mutation SubmitOrder($input: orderInput) {
+  submitOrder(input: $input) {
+    _id
+    order_status
+    customer_name
+    cooking_status
+    menu_items {
+      menu
+      order_qty
     }
+    total
+    createdAt
+    updatedAt
   }
+}
 `;
 
 export const UPDATE_ORDER = gql`

@@ -94,6 +94,8 @@ export const GET_ORDER = gql`
         order_qty
       }
       total
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -110,6 +112,8 @@ export const GET_ORDERS = gql`
         order_qty
       }
       total
+      createdAt
+      updatedAt
     }
   }
 `;

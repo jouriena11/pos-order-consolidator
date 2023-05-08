@@ -61,8 +61,10 @@ class AuthService {
       window.location.assign("/pos");
     } else if (role === "FOH Manager" && status === "active") {
       window.location.assign("/pos");
-    } else {
+    } else if (role === "Kitchen Manager" && status === "active") {
       window.location.assign("/kitchen-orders");
+    } else {
+      window.location.assign("/order-status");
     }
   }
 

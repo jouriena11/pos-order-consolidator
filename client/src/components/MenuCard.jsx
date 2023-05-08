@@ -1,4 +1,3 @@
-// TODO: to pass to OrderSummaryDrawer: [menu id, name, unit price, qty] - each click/tab is +1 to the qty?
 // TODO: to use in search: [category, name]
 
 import React, { useEffect } from "react";
@@ -18,12 +17,13 @@ import RocketSaladImg from "../assets/img/menu-salad-rocket.jpg";
 import BerrySaladImg from "../assets/img/menu-salad-berry-rhapsody.jpg";
 import BerryAvocadoToastImg from "../assets/img/menu-toast-avocado-strawberry.jpg";
 import PepperoniMagheritaToastImg from "../assets/img/menu-toast-margherita-pepperoni.jpg";
-import { useSelector, useDispatch } from "react-redux";
-import { decrement, increment } from "../stores/counterSlice";
+import { useDispatch } from "react-redux";
 import { addItem } from "../stores/orderSlice";
 
 export default function MenuCard(props) {
+  const dispatch = useDispatch()
   const { loading, data: menuList } = useQuery(GET_MENUS);
+
 
   useEffect(() => {
     if (loading) {
@@ -33,15 +33,13 @@ export default function MenuCard(props) {
     }
   }, [menuList]);
 
-  const count = useSelector((state) => state.counter.value);
-
   const HandleMenuClick = (name, price, id) => {
-    useDispatch(addItem({
+    dispatch(addItem({
       name,
       price,
       id,
+      qty: 1
     }))
-    // TODO: to pass menu data to OrderSummaryDrawer
   };
 
   // TODO: to apply responsive screen to MenuCards
@@ -66,8 +64,6 @@ export default function MenuCard(props) {
 
   return (
     <>
-      {count}
-      
       <ImageList
         // cols={cols}
         cols={3}
@@ -90,7 +86,7 @@ export default function MenuCard(props) {
               />
               <ImageListItemBar
                 title={item.name}
-                subtitle={<span>{item.price}</span>}
+                subtitle={<span>{item.price.toLocaleString("en-AU", {minimumFractionDigits: 2})}</span>}
                 // position="below"
                 sx={{ textAlign: "center", background: "rgba(0, 0, 0, 0.35)" }}
               />

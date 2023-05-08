@@ -30,7 +30,7 @@ function SaveNotification(props) {
   //   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   // });
 
-  const { notiMsg , openNoti } = props;
+  const { notiMsg, openNoti } = props;
   const [openNotification, setOpenNotification] = useState(openNoti);
   console.log(notiMsg, openNoti);
   const handleClick = () => {
@@ -113,7 +113,6 @@ function Users(props) {
       });
       setUserCheked();
       setNoti(true, `"${user.username}'s data has been updated"`);
-
     } catch (err) {
       console.error(err);
     }
@@ -178,8 +177,9 @@ function Users(props) {
         )}
       </TableCell>
       <TableCell align="center">
-        <Tooltip title="Select order to update" arrow placement="top">
+        <Tooltip title="Select user to update" arrow placement="top">
           <Checkbox
+            disabled={user.role === "Admin" ? true : false}
             checked={userChecked}
             onChange={handleCheckboxChange}
             label="parent"
@@ -198,13 +198,15 @@ function Users(props) {
       </TableCell>
       <TableCell align="center">
         <Tooltip title="Save status change" arrow placement="top">
-          <IconButton
-            sx={{ color: "grey" }}
-            onClick={handleSaveButtonClick}
-            disabled={!userChecked}
-          >
-            <SaveRoundedIcon />
-          </IconButton>
+          <span>
+            <IconButton
+              sx={{ color: "grey" }}
+              onClick={handleSaveButtonClick}
+              disabled={!userChecked}
+            >
+              <SaveRoundedIcon />
+            </IconButton>
+          </span>
         </Tooltip>
       </TableCell>
     </TableRow>
@@ -268,17 +270,21 @@ export default function Permissions() {
           <TableBody>
             {usersList &&
               usersList.getUsers.map((user) => (
-                <Users key={user._id} user={user} setNoti={(openStatus, msg) => { 
-                  console.log(openStatus, msg);
-                  setNotiMsg(msg); 
-                  setOpenNoti(openStatus); 
-                }} />
+                <Users
+                  key={user._id}
+                  user={user}
+                  setNoti={(openStatus, msg) => {
+                    console.log(openStatus, msg);
+                    setNotiMsg(msg);
+                    setOpenNoti(openStatus);
+                  }}
+                />
               ))}
           </TableBody>
         </Table>
       </TableContainer>
       {/* TODO: Snackbar is not showing */}
-      <SaveNotification notiMsg={notiMsg} openNoti={openNoti}/>
+      <SaveNotification notiMsg={notiMsg} openNoti={openNoti} />
     </>
   );
 }

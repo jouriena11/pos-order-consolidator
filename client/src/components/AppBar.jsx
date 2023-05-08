@@ -267,6 +267,9 @@ export default function NavBar() {
 
   useEffect(() => {
     switch (location) {
+      case "/dashboard":
+        setPageTitle("Dashboard");
+        break;
       case "/pos":
         setPageTitle("POS Order");
         break;

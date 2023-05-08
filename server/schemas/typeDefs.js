@@ -1,6 +1,8 @@
 const { gql } = require("apollo-server-express");
 
 const typeDefs = gql`
+  scalar Date
+
   type User {
     _id: ID!
     username: String!
@@ -9,6 +11,8 @@ const typeDefs = gql`
     last_name: String!
     role: String!
     status: String!
+    createdAt: Date!
+    updatedAt: Date!
   }
 
   type Auth {
@@ -20,6 +24,8 @@ const typeDefs = gql`
     _id: ID!
     name: String!
     menu: [Menu]
+    createdAt: Date!
+    updatedAt: Date!
   }
 
   type Menu {
@@ -28,6 +34,8 @@ const typeDefs = gql`
     name: String!
     price: Float!
     category_id: ID!
+    createdAt: Date!
+    updatedAt: Date!
   }
 
   type Order {
@@ -36,7 +44,9 @@ const typeDefs = gql`
     customer_name: String
     cooking_status: String!
     menu_items: [OrderMenu]
-    total: Int!
+    total: Float!
+    createdAt: Date!
+    updatedAt: Date!
   }
 
   type OrderMenu {
@@ -78,7 +88,7 @@ const typeDefs = gql`
     customer_name: String
     cooking_status: String!
     menu_items: [orderMenuInput!]
-    total: Int!
+    total: Float!
   }
 
   input orderMenuInput {
@@ -127,4 +137,3 @@ const typeDefs = gql`
 `;
 
 module.exports = typeDefs;
-

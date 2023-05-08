@@ -18,7 +18,7 @@ const resolvers = {
           throw new AuthenticationError("User is not logged in");
         }
         const user = await User.findOne({ _id: context.user._id });
-        console.log("user => ", user);
+        // console.log("user => ", user);
         return user;
       } catch (error) {
         console.error(error);
@@ -66,7 +66,7 @@ const resolvers = {
         }
 
         const menuCategories = await MenuCategory.find({}).populate("menu");
-        console.log(menuCategories);
+        // console.log(menuCategories);
         return menuCategories;
       } catch (error) {
         console.error(error);
@@ -283,7 +283,7 @@ const resolvers = {
           throw new Error("Input is blank");
         }
 
-        console.log("context.user from resolver =>", context.user);
+        // console.log("context.user from resolver =>", context.user);
 
         const { status, role } = context.user;
 
@@ -374,7 +374,7 @@ const resolvers = {
         }
 
         const { img, name, price, category_id } = input;
-        console.log("img =>", img);
+        // console.log("img =>", img);
 
         const { role, status } = context.user;
 
@@ -472,15 +472,8 @@ const resolvers = {
           throw new ForbiddenError("Unauthorized user");
         }
 
-        const { order_status, customer_name, cooking_status, menu_items } =
+        const { order_status, customer_name, cooking_status, menu_items, total } =
           input;
-
-        // Sum of each menuItem order_qty
-        let total = 0;
-        menu_items.forEach((item) => {
-          const { order_qty } = item;
-          total += order_qty;
-        });
 
         const newOrder = await Order.create({
           order_status,
@@ -490,10 +483,6 @@ const resolvers = {
           total,
         });
 
-        // newOrder.menu_items = await newOrder.menu_items.populate('menu');
-
-        console.log("newOrder => ", newOrder);
-
         return newOrder;
 
         // TODO: send notification to the Kitchen + automatically update Kitchen Orders
@@ -502,7 +491,7 @@ const resolvers = {
         throw error;
       }
     },
-    updateOrder: async (parent, { order_id, order_status }, context) => {
+    updateOrder: async (parent, { order_id, order_status, cooking_status }, context) => {
       try {
         if (!context.user) {
           throw new AuthenticationError("User is not logged in");

@@ -46,6 +46,9 @@ export default function AddCategory() {
         },
       });
       
+      // TODO: to replace alert with MUI Snackbar
+      alert("New menu category has been created")
+
       setAddCategoryFormData("");
 
       //   TODO: to invoke a notification modal, confirming to user that a new category has been created?
