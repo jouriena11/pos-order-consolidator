@@ -155,7 +155,15 @@ mutation SubmitOrder($input: orderInput) {
     customer_name
     cooking_status
     menu_items {
-      menu
+      menu {
+        _id
+        img
+        name
+        price
+        category_id
+        createdAt
+        updatedAt
+      }
       order_qty
     }
     total
@@ -166,21 +174,29 @@ mutation SubmitOrder($input: orderInput) {
 `;
 
 export const UPDATE_ORDER = gql`
-  mutation UpdateOrder($orderId: ID!, $orderStatus: String!) {
-    updateOrder(order_id: $orderId, order_status: $orderStatus) {
-      _id
-      order_status
-      customer_name
-      cooking_status
-      menu_items {
-        menu
-        order_qty
+mutation SubmitOrder($orderId: ID!, $orderStatus: String!) {
+  updateOrder(order_id: $orderId, order_status: $orderStatus) {
+    _id
+    order_status
+    customer_name
+    cooking_status
+    menu_items {
+      menu {
+        _id
+        img
+        name
+        price
+        category_id
+        createdAt
+        updatedAt
       }
-      total
-      createdAt
-      updatedAt
+      order_qty
     }
+    total
+    createdAt
+    updatedAt
   }
+}
 `;
 
 export const UPDATE_ORDERS = gql`

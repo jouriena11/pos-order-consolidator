@@ -112,18 +112,19 @@ const resolvers = {
       }
     },
     getOrders: async (parent, args, context) => {
+      console.log('begin');
       try {
         if (!context.user) {
           throw new AuthenticationError("User is not logged in");
         }
 
-        const orders = await Order.find({});
-
-        // const orders = await Order.find({}).populate({
-        //   path: 'menu_items.menu',
-        //   select: 'name'
-        // });
-
+        //const orders = await Order.find({});
+        console.log('pass');
+        const orders = await Order.find({}).populate({
+          path: 'menu_items.menu'
+        });
+        console.log('pass2');
+        console.log(orders);
         return orders;
       } catch (error) {
         console.error(error);
@@ -463,6 +464,9 @@ const resolvers = {
       }
     },
     submitOrder: async (parent, { input }, context) => {
+
+      console.log('input', input)
+
       try {
         if (!context.user) {
           throw new AuthenticationError("User is not logged in");
@@ -481,12 +485,16 @@ const resolvers = {
         const { order_status, customer_name, cooking_status, menu_items, total } =
           input;
 
-        const newOrder = await Order.create({
+        let newOrder = await Order.create({
           order_status,
           customer_name,
           cooking_status,
           menu_items,
           total,
+        });
+
+        newOrder = newOrder.populate({
+          path: 'menu_items.menu'
         });
 
         return newOrder;
@@ -509,11 +517,15 @@ const resolvers = {
           throw new ForbiddenError("Unauthorized user");
         }
 
-        const updatedOrder = await Order.findByIdAndUpdate(
+        let updatedOrder = await Order.findByIdAndUpdate(
           { _id: order_id },
           { order_status },
           { new: true }
         );
+
+        updatedOrder = updatedOrder.populate({
+          path: 'menu_items.menu'
+        });
 
         return updatedOrder;
       } catch (error) {
@@ -539,7 +551,7 @@ const resolvers = {
           { new: true }
         );
 
-        return updatedOrder;
+        return `${updatedOrder.deletedCount} orders documents have been updated`;
       } catch (error) {
         console.error(error);
         throw error;

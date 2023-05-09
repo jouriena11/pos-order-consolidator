@@ -112,6 +112,7 @@ function Users(props) {
         },
       });
       setUserCheked();
+      alert(`"${user.username}'s data has been updated"`)
       setNoti(true, `"${user.username}'s data has been updated"`);
     } catch (err) {
       console.error(err);

@@ -211,11 +211,10 @@ function Orders(props) {
                 {/* TODO: to align children table columns to the parent's  */}
                 <TableBody>
                   {order.menu_items.map((item) => (
-                    <TableRow key={item.menu}>
+                    <TableRow key={item.menu._id}>
                       <TableCell width={100} />
                       <TableCell align="center" component="th" scope="row">
-                        {/* TODO: to display menu name instead */}
-                        {item.menu}
+                        {item.menu.name}
                       </TableCell>
                       <TableCell align="center">{item.order_qty}</TableCell>
                       <TableCell align="center"></TableCell>

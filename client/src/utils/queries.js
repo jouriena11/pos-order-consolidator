@@ -108,7 +108,15 @@ export const GET_ORDERS = gql`
       customer_name
       cooking_status
       menu_items {
-        menu
+        menu {
+          _id
+          img
+          name
+          price
+          category_id
+          createdAt
+          updatedAt
+        }
         order_qty
       }
       total

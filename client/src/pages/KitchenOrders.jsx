@@ -67,8 +67,6 @@ function Orders(props) {
 
       // console.log ('testInput => ', testInput)
 
-      // TODO:
-
       await updateOrder({
         variables: {
           orderId: orderIds,
@@ -111,7 +109,7 @@ function Orders(props) {
           </IconButton>
         </TableCell>
         <TableCell align="center" component="th" scope="row">
-          {order.menu}
+          {order.menuName}
         </TableCell>
         <TableCell align="center">elapsed min:sec since first order</TableCell>
         <TableCell align="center">{order.qty}</TableCell>
@@ -234,19 +232,21 @@ function Orders(props) {
 
 export default function KitchenOrders() {
   const { loading, data: ordersList } = useQuery(GET_ORDERS);
-  const [formattedOrders, setFormattedOrders] = useState([]);
+  const [ kitchenOrders, setKitchenOrders] = useState([]);
 
   useEffect(() => {
     if (loading) {
       console.log("Loading...");
     } else {
       const orders = ordersList.getOrders;
-      // console.log("ordersList.getOrders => ", orders);
+      console.log("ordersList.getOrders => ", orders);
+      
 
-      const formattedOrders = orders.flatMap((order) => {
+      let kitchenOrders = orders.flatMap((order) => {
         return order.menu_items.map((item) => {
           return {
-            menu: item.menu,
+            menuId: item.menu._id,
+            menuName: item.menu.name,
             createdAt: dayjs(order.createdAt).format("HH:mm:ss"),
             qty: item.order_qty,
             order_status: order.order_status,
@@ -256,16 +256,15 @@ export default function KitchenOrders() {
         });
       });
 
-      setFormattedOrders(formattedOrders);
-    }
-  }, [ordersList]);
-  const consolidatedOrders = (formattedOrders) => {
-    return formattedOrders.reduce((acc, { menu, qty, order_id, createdAt, order_status, cooking_status }) => {
-        const index = acc.findIndex((item) => item.menu === menu); // TODO: to change to menu.name -- to work on joining table
+      console.log("kitchenOrders => ", kitchenOrders);
+
+      kitchenOrders = kitchenOrders.reduce((acc, { menuId, menuName, qty, order_id, createdAt, order_status, cooking_status }) => {
+        const index = acc.findIndex((item) => item.menuId === menuId); // TODO: to change to menu.name -- to work on joining table
         // if the item doesn't exist in the acc array, push the item into the array
         if (index === -1) {
           acc.push({
-            menu,
+            menuId,
+            menuName,
             qty,
             order_status,
             cooking_status,
@@ -279,7 +278,8 @@ export default function KitchenOrders() {
             // but if the acc[index] cooking status is no longer "On Queue", e.g. it has been changed to "Cooking", then the incoming new menu order would be treated as a new menu item in the acc array
             } else {
               acc.push({
-                menu,
+                menuId,
+                menuName,
                 qty,
                 order_status,
                 cooking_status,
@@ -289,12 +289,12 @@ export default function KitchenOrders() {
           }
         return acc;
       },[]);
-  };
 
-  const kitchenOrders = consolidatedOrders(formattedOrders);
+      setKitchenOrders(kitchenOrders);
+    }
+  }, [ordersList]);
 
-  console.log("formattedOrders => ", formattedOrders);
-  console.log("kitchenOrders => ", kitchenOrders);
+  // console.log("kitchenOrders => ", kitchenOrders);
 
   return (
     <TableContainer component={Paper}>
