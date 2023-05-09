@@ -35,7 +35,7 @@ This point-of-sale (POS) web application is designed to manage restaurant orders
 - GraphQL x Apollo Server
 - Day.js
 - JSON Web Token x jwt-decode
-- client-side localStorage
+- Client-side localStorage
 - Socket.io (pending)
 - Stripe (pending)
 
