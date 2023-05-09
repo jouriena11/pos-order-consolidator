@@ -64,7 +64,7 @@ class AuthService {
     } else if (role === "Kitchen Manager" && status === "active") {
       window.location.assign("/kitchen-orders");
     } else {
-      window.location.assign("/order-status");
+      window.location.assign("/order-status-report");
     }
   }
 

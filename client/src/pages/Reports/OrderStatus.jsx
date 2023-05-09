@@ -115,7 +115,8 @@ function Orders(props) {
           {/* TODO: to set Alert which will be activated after a certain amount of time has passed */}
           {/* TODO: to change font color after a certain amount of time has passed */}
           {/* TODO: once order staus is changed to "Served" and saved, the elapsed time counter should stop */}
-          <Typography variant="body2">elapsed min:sec</Typography>
+          <Typography variant="body2">{dayjs().diff(dayjs(order.createdAt), "min")}</Typography>
+          {dayjs(order.createdAt).format("HH:mm:ss")}
         </TableCell>
         <TableCell align="center">
           <Typography variant="body2">

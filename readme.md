@@ -123,6 +123,7 @@ This point-of-sale (POS) web application is designed to manage restaurant orders
 - to implement cutoff point for batch cooking, i.e. in real practice, there is a maximum limit to the amount of servings that can be cooked in batch
 - to include reminder-type notifications (using setTimeout()), i.e. when there's no change in an order/cooking status after a certain period of time, e.g. 5 minutes
 - to apply sorting, filtering, and pagination 
+- [Bug Fix] order consolidation currently only works when cooking status is "On Queue"
 
 ### **Permissions**
 - to apply sorting, filtering (e.g. by user role or user status), and pagination 
