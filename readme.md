@@ -2,18 +2,14 @@
 
 ## **Project Description**
 ---
-**`MVP`**
-- only support Prepaid orders (payment before cooking, i.e. 'pay-first' restaurant)
-- does not support split billing
-- no cash change calculation yet
-- no discount yet?
+
 
 <br>
 
 ## **URLs**
 ---
 - [Deployed Application]()
-- [GitHub Repository URL]()
+- [GitHub Repository URL](https://github.com/jouriena11/pos-order-consolidator)
 
 <br>
 
@@ -94,11 +90,12 @@ To run this web application in a local server, the following libraries must be i
 - to include discount options (e.g. percentage or absolute discount, total bill discount, and per-item discount)
 - to implement GST calculation
 - to implememnt `Stripe` library
+- to support post-paid (i.e. pay later) orders
+- to support support split billing
+- to implement cash change calculation
 - to improve mobile responsiveness
 - to code for 'Pending Orders' icon in the AppBar - when clicked, a modal displaying only pending orders (i.e. not yet served) would appear
 - to code for notification icon in the AppBar (when there's an incoming update from the kitchen, the notification icon should display an unread badge on top of the icon)
-
-
 
 ### **Profile**
 - to code `Update Profile` and `Change Password` pages
@@ -117,6 +114,7 @@ To run this web application in a local server, the following libraries must be i
 - to apply sorting, filtering (e.g. by user role or user status), and pagination 
 
 ### **Order Status Report**
+- to allow updating customer name
 - to implement real-time timer, showing minutes elapsed since an order has been created
 - to implement collapse table showing [menu items, qty, and remarks] that belong to each order 
 

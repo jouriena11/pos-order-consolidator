@@ -177,9 +177,29 @@ export const UPDATE_ORDER = gql`
         order_qty
       }
       total
+      createdAt
+      updatedAt
     }
   }
 `;
+
+export const UPDATE_ORDERS = gql`
+mutation UpdateOrders($orderId: [ID]!, $cookingStatus: String!, $orderStatus: String!) {
+  updateOrders(order_id: $orderId, cooking_status: $cookingStatus, order_status: $orderStatus) {
+    _id
+    order_status
+    customer_name
+    cooking_status
+    menu_items {
+      menu
+      order_qty
+    }
+    total
+    createdAt
+    updatedAt
+  }
+}
+`
 
 export const DELETE_ORDER = gql`
   mutation DeleteOrder($orderId: ID!) {

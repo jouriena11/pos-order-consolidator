@@ -118,6 +118,12 @@ const resolvers = {
         }
 
         const orders = await Order.find({});
+
+        // const orders = await Order.find({}).populate({
+        //   path: 'menu_items.menu',
+        //   select: 'name'
+        // });
+
         return orders;
       } catch (error) {
         console.error(error);
@@ -506,6 +512,30 @@ const resolvers = {
         const updatedOrder = await Order.findByIdAndUpdate(
           { _id: order_id },
           { order_status },
+          { new: true }
+        );
+
+        return updatedOrder;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    updateOrders: async (parent, { order_id, order_status, cooking_status }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("User is not logged in");
+        }
+
+        const { role, status } = context.user;
+
+        if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
+          throw new ForbiddenError("Unauthorized user");
+        }
+
+        const updatedOrder = await Order.updateMany(
+          { _id: { $in: order_id} },
+          { order_status, cooking_status },
           { new: true }
         );
 

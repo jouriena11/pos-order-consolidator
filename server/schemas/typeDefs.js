@@ -80,6 +80,7 @@ const typeDefs = gql`
     deleteMenu(menu_id: ID!): String
     submitOrder(input: orderInput): Order
     updateOrder(order_id: ID!, order_status: String!): Order
+    updateOrders(order_id: [ID]!, cooking_status: String!, order_status: String!): Order
     deleteOrder(order_id: ID!): String
   }
 

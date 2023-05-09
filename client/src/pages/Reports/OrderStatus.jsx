@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { GET_ORDERS } from "../../utils/queries";
 import { UPDATE_ORDER } from "../../utils/mutations";
 import Auth from "../../utils/auth";
+import dayjs from "dayjs";
 
 import {
   Table,
@@ -20,16 +21,16 @@ import {
   Select,
   Checkbox,
   Snackbar,
+  Box,
 } from "@mui/material";
 
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 
-const dayjs = require("dayjs");
-
 function Orders(props) {
   const { user, order, setNoti } = props;
+  const [open, setOpen] = useState(false);
   const [orderStatus, setOrderStatus] = useState(order.order_status);
   const [orderChecked, setOrderCheked] = useState(false);
 
@@ -66,7 +67,6 @@ function Orders(props) {
 
   const handleSaveButtonClick = async () => {
     try {
-      // TODO: to check
       await updateOrder({
         variables: {
           orderId: order._id,
@@ -90,6 +90,15 @@ function Orders(props) {
   return (
     <>
       <TableRow>
+        <TableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TableCell>
         <TableCell align="center">
           <Typography variant="body2">{order._id}</Typography>
         </TableCell>
@@ -107,6 +116,11 @@ function Orders(props) {
           {/* TODO: to change font color after a certain amount of time has passed */}
           {/* TODO: once order staus is changed to "Served" and saved, the elapsed time counter should stop */}
           <Typography variant="body2">elapsed min:sec</Typography>
+        </TableCell>
+        <TableCell align="center">
+          <Typography variant="body2">
+            {order.total.toLocaleString("en-AU", { minimumFractionDigits: 2 })}
+          </Typography>
         </TableCell>
         <TableCell align="center">
           <Typography variant="body2">{order.cooking_status}</Typography>
@@ -173,8 +187,62 @@ function Orders(props) {
           </Tooltip>
         </TableCell>
       </TableRow>
+      <TableRow>
+        <TableCell style={{ padding: 0 }} colSpan={7}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
+              <Table size="small" aria-label="purchases">
+                <TableHead>
+                  <TableRow>
+                    <TableCell width={100} />
+                    <TableCell sx={{ fontWeight: 700 }} align="center">
+                      Menu
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }} align="center">
+                      Servings
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }} align="center">
+                      Remarks
+                    </TableCell>
+                    <TableCell />
+                    <TableCell />
+                  </TableRow>
+                </TableHead>
+                {/* TODO: to align children table columns to the parent's  */}
+                <TableBody>
+                  {order.menu_items.map((item) => (
+                    <TableRow key={item.menu}>
+                      <TableCell width={100} />
+                      <TableCell align="center" component="th" scope="row">
+                        {/* TODO: to display menu name instead */}
+                        {item.menu}
+                      </TableCell>
+                      <TableCell align="center">{item.order_qty}</TableCell>
+                      <TableCell align="center"></TableCell>
+                      {/* TODO: to implement checkbox with Indeterminate property, i.e. parent-child checkboxes */}
+                      {/* <TableCell align="center">
+                        <Checkbox
+                          sx={{
+                            color: "grey",
+                            "&.Mui-checked": {
+                              color: "grey",
+                            },
+                          }}
+                          inputProps={{
+                            "aria-label": "select all orders",
+                          }}
+                        />
+                      </TableCell> */}
+                      <TableCell />
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
     </>
-    // TODO: collapsible menu -- [menu items + item qty + remarks] that belongs to each order
   );
 }
 
@@ -199,6 +267,7 @@ export default function OrderStatus() {
         <Table aria-label="Users Management Table">
           <TableHead>
             <TableRow>
+              <TableCell />
               <TableCell align="center" sx={{ fontWeight: 700 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>
                   Order ID
@@ -217,6 +286,11 @@ export default function OrderStatus() {
               <TableCell align="center" sx={{ fontWeight: 700 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>
                   Elapsed Time
+                </Typography>
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  Bill Value ($)
                 </Typography>
               </TableCell>
               <TableCell align="center" sx={{ fontWeight: 700 }}>
