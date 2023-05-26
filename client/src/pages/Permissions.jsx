@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import { GET_USERS } from "../utils/queries";
-import { UPDATE_USER_ROLE_STATUS } from "../utils/mutations";
+import { UPDATE_USER_ROLE_STATUS, DELETE_USER } from "../utils/mutations";
 import Auth from "../utils/auth";
 
 import {
@@ -19,11 +19,13 @@ import {
   Select,
   Checkbox,
   Snackbar,
+  Icon,
 } from "@mui/material";
 
 import MuiAlert from "@mui/material/Alert";
 
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 function SaveNotification(props) {
   // const Alert = React.forwardRef(function Alert(props, ref) {
@@ -58,7 +60,7 @@ function SaveNotification(props) {
 }
 
 function Users(props) {
-  const { user, setNoti } = props;
+  const { user, setNoti, refetch } = props;
   const [userRole, setUserRole] = useState(user.role);
   const [userStatus, setUserStatus] = useState(user.status);
   const [userChecked, setUserCheked] = useState(false);
@@ -90,11 +92,11 @@ function Users(props) {
 
   const statusColor = selectBgColor(userStatus);
 
-  const [updateUser, { loading, data }] = useMutation(UPDATE_USER_ROLE_STATUS);
-
   const token = Auth.loggedIn() ? Auth.getToken() : null;
 
-  const handleSaveButtonClick = async () => {
+  const [updateUser, { updateLoading, updateData }] = useMutation(UPDATE_USER_ROLE_STATUS);
+
+  const HandleSaveButtonClick = async () => {
     try {
       await updateUser({
         variables: {
@@ -118,6 +120,25 @@ function Users(props) {
       console.error(err);
     }
   };
+
+  const [deleteUser, { loading: deleteLoading, data: deleteData }] = useMutation(DELETE_USER, );
+
+  const HandleDeleteBtnClick = async (event) => {
+    try {
+      await deleteUser({
+        variables: { userId: user._id},
+        context: {
+          headers: {
+            authorization: token ? `Bearer ${token}` : "",
+          },
+        },
+      });
+      alert('User successfully deleted.');
+      refetch();
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   return (
     <TableRow>
@@ -202,10 +223,23 @@ function Users(props) {
           <span>
             <IconButton
               sx={{ color: "grey" }}
-              onClick={handleSaveButtonClick}
+              onClick={HandleSaveButtonClick}
               disabled={!userChecked}
             >
               <SaveRoundedIcon />
+            </IconButton>
+          </span>
+        </Tooltip>
+      </TableCell>
+      <TableCell>
+        <Tooltip title="Delete user" arrow placement="top">
+          <span>
+            <IconButton
+                sx={{ color: "grey" }}
+                onClick={HandleDeleteBtnClick}
+                disabled={!userChecked}
+              >
+              <DeleteForeverIcon/>
             </IconButton>
           </span>
         </Tooltip>
@@ -215,7 +249,7 @@ function Users(props) {
 }
 
 export default function Permissions() {
-  const { loading, data: usersList } = useQuery(GET_USERS);
+  const { loading, data: usersList, refetch: refetchUserList } = useQuery(GET_USERS);
   const [notiMsg, setNotiMsg] = useState("");
   const [openNoti, setOpenNoti] = useState(false);
 
@@ -279,6 +313,7 @@ export default function Permissions() {
                     setNotiMsg(msg);
                     setOpenNoti(openStatus);
                   }}
+                  refetch={refetchUserList}
                 />
               ))}
           </TableBody>

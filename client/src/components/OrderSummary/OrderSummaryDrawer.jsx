@@ -60,6 +60,7 @@ export default function OrderSummaryDrawer(props) {
   const orderList = useSelector((state) => state.order.order_list);
   const [submitOrder, { loading, data }] = useMutation(SUBMIT_ORDER);
   const dispatch = useDispatch();
+  console.log('isMobilei=>',isMobile);
 
   let total = 0;
   for (const order of orderList) {
@@ -77,8 +78,6 @@ export default function OrderSummaryDrawer(props) {
       order_qty: item.qty,
     };
   });
-
-  // console.log("reformatOrderList => ", reformatOrderList)
 
   const token = Auth.loggedIn() ? Auth.getToken() : null;
 
@@ -276,10 +275,9 @@ export default function OrderSummaryDrawer(props) {
   );
 
   return (
-    // TODO: the permanent drawer is currently blocking the IconButtons on the right side of the NavBar
     <Drawer
       sx={{
-        width: drawerWidth,
+        width: isMobile? 0: drawerWidth, // Note: this code is a fix for menu cards
         flexShrink: 0,
         "& .MuiDrawer-paper": {
           width: drawerWidth,
@@ -293,6 +291,7 @@ export default function OrderSummaryDrawer(props) {
       onClose={onClose} // Note: `onClose` is also an MUI component property
     >
       {drawer}
+      
     </Drawer>
   );
 }

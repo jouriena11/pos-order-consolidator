@@ -15,7 +15,7 @@ class AuthService {
       const decoded = decode(token);
       if (decoded.exp < Date.now() / 1000) {
         // if the token is expired, remove it from localStorage
-        localStorage.removeItem("id_token"); // TODO: to check if this is correct
+        localStorage.removeItem("id_token");
         return true;
       } else {
         return false;
@@ -26,7 +26,9 @@ class AuthService {
   }
 
   getRole() {
-    this.loggedIn();
+    if(!this.loggedIn()) {
+      return null;
+    }
     const user = this.getProfile();
     const { role, status } = user.data;
     switch (role) {
@@ -56,7 +58,7 @@ class AuthService {
 
   login(idToken, role, status) {
     localStorage.setItem("id_token", idToken);
-    // TODO: is it possible to pass the error message from resolvers function
+    // Note: the goal of frontend error message is to notify users what go wrong, whereas backend validation is all about granting permissions to access database
     if (role === "Admin" && status === "active") {
       window.location.assign("/pos");
     } else if (role === "FOH Manager" && status === "active") {

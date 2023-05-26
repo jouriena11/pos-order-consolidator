@@ -148,77 +148,91 @@ export const DELETE_MENU = gql`
 `;
 
 export const SUBMIT_ORDER = gql`
-mutation SubmitOrder($input: orderInput) {
-  submitOrder(input: $input) {
-    _id
-    order_status
-    customer_name
-    cooking_status
-    menu_items {
-      menu {
-        _id
-        img
-        name
-        price
-        category_id
-        createdAt
-        updatedAt
+  mutation SubmitOrder($input: orderInput) {
+    submitOrder(input: $input) {
+      _id
+      order_status
+      customer_name
+      cooking_status
+      menu_items {
+        menu {
+          _id
+          img
+          name
+          price
+          category_id
+          createdAt
+          updatedAt
+        }
+        order_qty
       }
-      order_qty
+      total
+      createdAt
+      updatedAt
     }
-    total
-    createdAt
-    updatedAt
   }
-}
 `;
 
 export const UPDATE_ORDER = gql`
-mutation SubmitOrder($orderId: ID!, $orderStatus: String!) {
-  updateOrder(order_id: $orderId, order_status: $orderStatus) {
-    _id
-    order_status
-    customer_name
-    cooking_status
-    menu_items {
-      menu {
-        _id
-        img
-        name
-        price
-        category_id
-        createdAt
-        updatedAt
+  mutation SubmitOrder($orderId: ID!, $orderStatus: String!) {
+    updateOrder(order_id: $orderId, order_status: $orderStatus) {
+      _id
+      order_status
+      customer_name
+      cooking_status
+      menu_items {
+        menu {
+          _id
+          img
+          name
+          price
+          category_id
+          createdAt
+          updatedAt
+        }
+        order_qty
       }
-      order_qty
+      total
+      createdAt
+      updatedAt
     }
-    total
-    createdAt
-    updatedAt
   }
-}
 `;
 
 export const UPDATE_ORDERS = gql`
-mutation UpdateOrders($orderId: [ID]!, $cookingStatus: String!, $orderStatus: String!) {
-  updateOrders(order_id: $orderId, cooking_status: $cookingStatus, order_status: $orderStatus) {
-    _id
-    order_status
-    customer_name
-    cooking_status
-    menu_items {
-      menu
-      order_qty
+  mutation UpdateOrders(
+    $orderId: [ID]!
+    $cookingStatus: String!
+    $orderStatus: String!
+  ) {
+    updateOrders(
+      order_id: $orderId
+      cooking_status: $cookingStatus
+      order_status: $orderStatus
+    ) {
+      _id
+      order_status
+      customer_name
+      cooking_status
+      menu_items {
+        menu
+        order_qty
+      }
+      total
+      createdAt
+      updatedAt
     }
-    total
-    createdAt
-    updatedAt
   }
-}
-`
+`;
 
 export const DELETE_ORDER = gql`
   mutation DeleteOrder($orderId: ID!) {
     deleteOrder(order_id: $orderId)
+  }
+`;
+
+export const DELETE_USER = gql`
+  mutation deleteUser($userId: ID!) {
+    deleteUser(user_id: $userId)
   }
 `;

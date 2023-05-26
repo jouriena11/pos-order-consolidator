@@ -1,5 +1,9 @@
 const jwt = require("jsonwebtoken");
 const { GraphQLError } = require("graphql");
+const {
+  AuthenticationError,
+  ForbiddenError,
+} = require("apollo-server-express");
 require("dotenv").config();
 
 const secret = process.env.SECRET;
@@ -47,22 +51,18 @@ module.exports = {
 
     return jwt.sign({ data: payload }, secret, { expiresIn: expiration });
   },
-  checkAdmin: function ({ context }) {
-    const { role, status } = context.user;
-    if (role !== "Admin" && status !== "active") {
-      throw new ForbiddenError("Unauthorized user");
+  // Note: checkLogin shouldn't be merged into checkRole as each function is responsible for a different task
+  checkLogin: function (context) {
+    if (!context.user) {
+      throw new AuthenticationError("User is not logged in");
     }
   },
-  checkFOHManager: function ({ context }) {
+  checkRole: function (context, roleList) {
     const { role, status } = context.user;
-    if (role !== "FOH Manager" && status !== "active") {
+
+    if(!roleList.includes(role) || status !== "active") {
       throw new ForbiddenError("Unauthorized user");
     }
-  },
-  checkKitchenManager: function ({ context }) {
-    const { role, status } = context.user;
-    if (role !== "Kitchen Manager" && status !== "active") {
-      throw new ForbiddenError("Unauthorized user");
-    }
-  },
+
+  }
 };

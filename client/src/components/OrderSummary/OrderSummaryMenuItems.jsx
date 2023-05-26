@@ -59,7 +59,6 @@ function QtyControl(props) {
   );
 };
 
-// TODO: to pass props from MenuCard
 export default function OrderSummaryMenuItems(props) {
   const { menu, price } = props;
   const orderList = useSelector((state) => state.order.order_list)

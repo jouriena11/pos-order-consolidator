@@ -5,18 +5,15 @@ const {
 const { User, MenuCategory, Menu, Order } = require("../models");
 const {
   signToken,
-  checkAdmin,
-  checkFOHManager,
-  checkKitchenManager,
+  checkLogin,
+  checkRole,
 } = require("../utils/auth");
 
 const resolvers = {
   Query: {
     getUser: async (parent, args, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
+        checkLogin(context)
         const user = await User.findOne({ _id: context.user._id });
         // console.log("user => ", user);
         return user;
@@ -27,15 +24,8 @@ const resolvers = {
     },
     getUsers: async (parent, args, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
-
-        const { role, status } = context.user;
-
-        if (role !== "Admin" && status !== "active") {
-          throw new ForbiddenError("Unauthorized user");
-        }
+        checkLogin(context);
+        checkRole(context, "Admin");
 
         const users = User.find({});
         return users;
@@ -46,9 +36,8 @@ const resolvers = {
     },
     getMenuCategory: async (parent, { category_id }, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager"]);
 
         const menuCategory = await MenuCategory.findById(category_id).populate(
           "menu"
@@ -61,9 +50,8 @@ const resolvers = {
     },
     getMenuCategories: async (parent, args, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager"]);
 
         const menuCategories = await MenuCategory.find({}).populate("menu");
         // console.log(menuCategories);
@@ -75,9 +63,8 @@ const resolvers = {
     },
     getMenu: async (parent, { menu_id }, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager"]);
 
         const menu = await Menu.findById(menu_id);
         return menu;
@@ -88,9 +75,9 @@ const resolvers = {
     },
     getMenus: async (parent, args, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager"]);
+
         const menus = await Menu.find({});
         return menus;
       } catch (error) {
@@ -100,9 +87,8 @@ const resolvers = {
     },
     getOrder: async (parent, { order_id }, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager"]);
 
         const order = await Order.findById(order_id);
         return order;
@@ -114,12 +100,8 @@ const resolvers = {
     getOrders: async (parent, args, context) => {
       console.log('begin');
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
-
-        //const orders = await Order.find({});
-        console.log('pass');
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager", "Kitchen Manager"]);
         const orders = await Order.find({}).populate({
           path: 'menu_items.menu'
         });
@@ -134,7 +116,7 @@ const resolvers = {
   },
 
   Mutation: {
-    signup: async (parent, { input }, context) => {
+    signup: async (parent, { input }) => {
       try {
         const {
           username,
@@ -164,20 +146,14 @@ const resolvers = {
       }
     },
     deleteUser: async (parent, { user_id }, context) => {
-      if (!context.user) {
-        throw new AuthenticationError("User is not logged in");
-      }
+      
+      checkLogin(context);
+      checkRole(context, "Admin")
 
       if (!user_id) {
         throw new Error("Input value is empty");
       }
-
-      const { role, status } = context.user;
-
-      if (role !== "Admin" && status !== "active") {
-        throw new ForbiddenError("Unauthorized user");
-      }
-
+      
       const delUser = await User.deleteOne({ _id: user_id });
 
       return `Successfully deleted ${delUser.deletedCount} Order document`;
@@ -205,9 +181,7 @@ const resolvers = {
     },
     updateProfile: async (parent, { input }, context) => {
       try {
-        if (!context.user) {
-          throw new Error("User is not logged in");
-        }
+        checkLogin(context);
 
         if (Object.keys(input).length === 0) {
           throw new Error("Input object is empty");
@@ -223,15 +197,9 @@ const resolvers = {
         throw error;
       }
     },
-    changePassword: async (
-      parent,
-      { currentPassword, newPassword },
-      context
-    ) => {
+    changePassword: async (parent, { currentPassword, newPassword },context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
+        checkLogin(context);
 
         if (!currentPassword || !newPassword) {
           throw new Error("Input object is empty");
@@ -255,14 +223,10 @@ const resolvers = {
     },
     updateUserStatusRole: async (parent, { input }, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
+        checkLogin(context);
+        checkRole(context, "Admin");
+
         // TODO: must have another collection to store logs of updates (e.g. created_by, updated_by)?
-        // Only admin user can update other users role and status, but other fields are off limit to the admin
-        if (context.user.role !== "Admin") {
-          throw new ForbiddenError("Unauthorized user");
-        }
 
         const { user_id, user_status, user_role } = input;
 
@@ -282,25 +246,13 @@ const resolvers = {
     },
     addMenuCategory: async (parent, { category_name }, context) => {
       try {
-        if (!context.user) {
-          throw new Error("User is not logged in");
-        }
+
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager"]);
 
         if (!category_name) {
           throw new Error("Input is blank");
         }
-
-        // console.log("context.user from resolver =>", context.user);
-
-        const { status, role } = context.user;
-
-        if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
-          throw new ForbiddenError("Unauthorized user");
-        }
-
-        // TODO: why aren't the following functions working?
-        // checkAdmin(status, role);
-        // checkFOHManager(status, role);
 
         // TODO: to move .pre("save") here instead
         const newMenuCategory = await MenuCategory.create({
@@ -313,23 +265,13 @@ const resolvers = {
         throw error;
       }
     },
-    updateMenuCategory: async (
-      parent,
-      { category_id, category_name },
-      context
-    ) => {
+    updateMenuCategory: async (parent, { category_id, category_name }, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager"])
 
         if (!category_id || !category_name || category_name === "") {
           throw new Error("Input value is blank");
-        }
-        const { role, status } = context.user;
-
-        if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
-          throw new ForbiddenError("Unauthorized user");
         }
 
         const updateMenuCategory = await MenuCategory.findOneAndUpdate(
@@ -346,18 +288,11 @@ const resolvers = {
     },
     deleteMenuCategory: async (parent, { category_id }, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager"])
 
         if (!category_id) {
           throw new Error("Input is blank");
-        }
-
-        const { role, status } = context.user;
-
-        if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
-          throw new ForbiddenError("Unauthorized user");
         }
 
         const delMenuCategory = await MenuCategory.deleteOne({
@@ -372,9 +307,8 @@ const resolvers = {
     },
     addMenu: async (parent, { input }, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager"])
 
         if (Object.keys(input).length === 0) {
           throw new Error("Inpu Object is empty");
@@ -382,12 +316,6 @@ const resolvers = {
 
         const { img, name, price, category_id } = input;
         // console.log("img =>", img);
-
-        const { role, status } = context.user;
-
-        if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
-          throw new ForbiddenError("Unauthorized user");
-        }
 
         const newMenu = await Menu.create({
           img,
@@ -403,19 +331,14 @@ const resolvers = {
       }
     },
     updateMenu: async (parent, { input }, context) => {
-      if (!context.user) {
-        throw new AuthenticationError("User is not logged in");
-      }
+      checkLogin(context);
+      checkRole(context, ["Admin", "FOH Manager"])
+
       if (Object.keys(input).length === 0) {
         throw new Error("Object input is empty");
       }
 
       const { menu_id, img, name, price } = input;
-      const { role, status } = context.user;
-
-      if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
-        new ForbiddenError("Unauthorized user");
-      }
 
       const menu = await Menu.findById(menu_id);
 
@@ -442,17 +365,10 @@ const resolvers = {
     },
     deleteMenu: async (parent, { menu_id }, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager"])
         if (!menu_id) {
           throw new Error("Input value is blank");
-        }
-
-        const { role, status } = context.user;
-
-        if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
-          throw new ForbiddenError("Unauthorized user");
         }
 
         const delMenu = await Menu.deleteOne({ _id: menu_id });
@@ -465,21 +381,14 @@ const resolvers = {
     },
     submitOrder: async (parent, { input }, context) => {
 
-      console.log('input', input)
+      // console.log('input', input)
 
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager"]);
 
         if (Object.keys(input).length === 0) {
           throw new Error("Input object is empty");
-        }
-
-        const { role, status } = context.user;
-
-        if (role !== "FOH Manager" && role !== "Admin" && status !== "active") {
-          throw new ForbiddenError("Unauthorized user");
         }
 
         const { order_status, customer_name, cooking_status, menu_items, total } =
@@ -493,13 +402,14 @@ const resolvers = {
           total,
         });
 
+        // TODO: to review
         newOrder = newOrder.populate({
           path: 'menu_items.menu'
         });
 
         return newOrder;
 
-        // TODO: send notification to the Kitchen + automatically update Kitchen Orders
+        // TODO: to send notification to the Kitchen + automatically update Kitchen Orders
       } catch (error) {
         console.error(error);
         throw error;
@@ -507,15 +417,8 @@ const resolvers = {
     },
     updateOrder: async (parent, { order_id, order_status, cooking_status }, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
-
-        const { role, status } = context.user;
-
-        if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
-          throw new ForbiddenError("Unauthorized user");
-        }
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager"]); // TODO: to review if Kitchen Manager should be authorized to execute this function
 
         let updatedOrder = await Order.findByIdAndUpdate(
           { _id: order_id },
@@ -535,15 +438,8 @@ const resolvers = {
     },
     updateOrders: async (parent, { order_id, order_status, cooking_status }, context) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("User is not logged in");
-        }
-
-        const { role, status } = context.user;
-
-        if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
-          throw new ForbiddenError("Unauthorized user");
-        }
+        checkLogin(context);
+        checkRole(context, ["Admin", "FOH Manager"]); // TODO: to review if Kitchen Manager should be authorized to execute this function
 
         const updatedOrder = await Order.updateMany(
           { _id: { $in: order_id} },
@@ -558,21 +454,11 @@ const resolvers = {
       }
     },
     deleteOrder: async (parent, { order_id }, context) => {
-      if (!context.user) {
-        throw new AuthenticationError("User is not logged in");
-      }
+      checkLogin(context);
+      checkRole(context, ["Admin", "FOH Manager"]);
 
       if (!order_id) {
         throw new Error("Input value is blank");
-      }
-
-      // checkAdmin(context);
-      // checkFOHManager(context);
-
-      const { status, role } = context.user;
-
-      if (role !== "Admin" && role !== "FOH Manager" && status !== "active") {
-        throw new ForbiddenError("Unauthorized user");
       }
 
       const delOrder = await Order.deleteOne({ _id: order_id });

@@ -1,14 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
   createHttpLink,
 } from "@apollo/client";
-import { setContext } from '@apollo/client/link/context';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { setContext } from "@apollo/client/link/context";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  Outlet,
+} from "react-router-dom";
 
-import { ThemeProvider, createTheme, Typography } from "@mui/material";
+import { ThemeProvider, createTheme } from "@mui/material";
 import "@fontsource/karla";
 
 import SignIn from "./SignIn";
@@ -23,6 +30,9 @@ import KitchenOrders from "./KitchenOrders";
 import Permissions from "./Permissions";
 import ProfileUpdate from "./Profile/ProfileUpdate";
 import ChangePassword from "./Profile/ChangePassword";
+import AccessDenied from "./AccessDenied";
+import NotFound from "./NotFound";
+import Auth from "../utils/auth";
 
 const httpLink = createHttpLink({
   uri: process.env.REACT_APP_GRAPHQL_SERVER,
@@ -52,7 +62,28 @@ const mainTheme = createTheme({
   },
 });
 
-// TODO: currently, menus are hidden from unauthorized user but unauthorized user can still access the page through URL
+
+function ProtectedRoute({ children }) {
+  const location = useLocation().pathname;
+  const role = Auth.getRole();
+  const FOHPath = [
+    "/pos",
+    "/add-menu-category",
+    "/add-menu",
+    "/order-status-report",
+  ];
+  const FOHUser = ["Admin", "FOH Manager"];
+  const kitchenUser = ["Admin", "Kitchen Manager"]
+
+  if (
+    (location === "/user-permissions" && role !== "Admin") ||
+    (FOHPath.includes(location) && !FOHUser.includes(role)) ||
+    (location === "/kitchen-orders" && !kitchenUser.includes(role))
+  ) {
+    return <Navigate to="/access-denied" replace />;
+  }
+  return <Outlet/>;
+}
 
 function App() {
   return (
@@ -64,16 +95,20 @@ function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route element={<NavBar />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/pos" element={<POSOrderPage />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/update-profile" element={<ProfileUpdate />} />
               <Route path="/change-password" element={<ChangePassword />} />
-              <Route path="/add-menu-category" element={< AddCategory/>} />
-              <Route path="/add-menu" element={< AddMenu/>} />
-              <Route path="/kitchen-orders" element={<KitchenOrders />} />
-              <Route path="/order-status-report" element={<OrderStatus />} />
-              <Route path="/user-permissions" element={<Permissions />} />
+                <Route element={<ProtectedRoute/>}>
+                  <Route path="/kitchen-orders" element={<KitchenOrders />} />
+                  <Route path="/add-menu-category" element={<AddCategory />} />
+                  <Route path="/add-menu" element={<AddMenu />} />
+                  <Route path="/pos" element={<POSOrderPage />} />
+                  <Route path="/order-status-report" element={<OrderStatus />}/>
+                  <Route path="/user-permissions" element={<Permissions />}/>
+                </Route>
+              <Route path="/access-denied" element={<AccessDenied />} />
             </Route>
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>
       </ThemeProvider>

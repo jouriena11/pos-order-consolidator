@@ -231,12 +231,11 @@ const MainDrawerMenu2 = [
 ];
 
 export default function NavBar() {
-  const theme = useTheme(); // TODO: what if the mainTheme specified in App.jsx is to be used?
+  const theme = useTheme();
   const location = useLocation().pathname;
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState(-1);
   const [openOrderSummary, setOpenOrderSummary] = useState(false);
-
   const [pageTitle, setPageTitle] = useState("");
 
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -340,8 +339,10 @@ export default function NavBar() {
       {/* TODO: still don't understand the logic... of setOpenMenu(openMenu === index ? -1 : index) */}
       <List>
         {MainDrawerMenu.map((menu, index) => {
-          return (menu.requiredRole && menu.requiredRole.includes(Auth.getRole())) || !menu.requiredRole ? 
-            (menu.subMenus ? (
+          return (menu.requiredRole &&
+            menu.requiredRole.includes(Auth.getRole())) ||
+            !menu.requiredRole ? (
+            menu.subMenus ? (
               <div key={index}>
                 <ListItemButton
                   onClick={() => setOpenMenu(openMenu === index ? -1 : index)}
@@ -446,7 +447,7 @@ export default function NavBar() {
           >
             {pageTitle}
           </Typography>
-          {location === "/pos" && (
+          {!isMobile && location === "/pos" && (
             <Search>
               <SearchIconWrapper>
                 <SearchIcon />
@@ -464,13 +465,12 @@ export default function NavBar() {
             </IconButton>
           </Tooltip>
 
-          {/* TODO: to fix badge position */}
           <Tooltip title="Notifications" arrow>
-            {/* <Badge badgeContent={1} color="secondary"> */}
-            <IconButton color="inherit">
+            <IconButton color="inherit" sx={{postion: "relative"}} >
+              {/* TODO: replace '1' with combined order qty */}
+              <Badge badgeContent={1} color="secondary" sx={{position: "absolute", top: "8px", right: "10px"}}/>
               <NotificationsIcon />
             </IconButton>
-            {/* </Badge> */}
           </Tooltip>
 
           {isMobile && (

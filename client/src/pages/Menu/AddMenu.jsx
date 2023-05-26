@@ -18,7 +18,10 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  IconButton,
 } from "@mui/material";
+
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 
 const theme = createTheme();
 
@@ -30,6 +33,7 @@ export default function AddMenu() {
   });
 
   const [nameError, setNameError] = useState(false);
+  const [imgFile, setImgFile] = useState(undefined);
 
   const { loading, data: menuCategoriesList } = useQuery(GET_MENU_CATEGORIES);
   const [addMenu, { error, data }] = useMutation(ADD_MENU);
@@ -47,9 +51,18 @@ export default function AddMenu() {
 
   const handleInputChange = (event) => {
     const { name, value, type } = event.target;
-    let newValue = type === "number" && value !== "" ? Number(parseFloat(value).toFixed(2)) : value;
+    let newValue =
+      type === "number" && value !== ""
+        ? Number(parseFloat(value).toFixed(2))
+        : value;
     setAddMenuFormData({ ...addMenuFormData, [name]: newValue });
   };
+
+  const handleFileUpload = (event) => {
+    setImgFile(event.target.files[0]);
+    const tempURLFile = URL.createObjectURL(event.target.files[0])
+    console.log(tempURLFile);
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -79,7 +92,7 @@ export default function AddMenu() {
           },
         },
       });
-      
+
       setAddMenuFormData({
         name: "",
         price: "",
@@ -87,7 +100,7 @@ export default function AddMenu() {
       });
 
       // TODO: to replace alert with MUI Snackbar
-      alert("New menu has been created")
+      alert("New menu has been created");
       // console.log("data from client/src/pages/AddMenu.jsx", data);
     } catch (err) {
       console.error(err);
@@ -105,6 +118,7 @@ export default function AddMenu() {
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="sm">
         <CssBaseline />
+        {/* TODO: to flatten Box */}
         <Box xs={12} sm={8} md={5} component={Paper} elevation={6}>
           <Box
             sx={{
@@ -124,6 +138,7 @@ export default function AddMenu() {
               onSubmit={handleSubmit}
               sx={{ mt: 1 }}
             >
+              {/* TODO: to change from Box to Grid */}
               <Box
                 display="flex"
                 justifyContent={"center"}
@@ -203,10 +218,33 @@ export default function AddMenu() {
 
                 {/* TODO: error message */}
               </Box>
-              <Box display={"flex"} justifyContent={"flex-end"}>
-                {/* TODO: image upload  */}
-                {/* TODO: to change justifyContent to "space-between" */}
-
+              <Box
+                display="flex"
+                justifyContent={"flex-start"}
+                alignItems={"center"}
+              >
+                <Typography sx={{ mr: 2, width: fieldLabelWidth }}>
+                  Image:
+                </Typography>
+                <Button 
+                  variant="contained" 
+                  component="label" 
+                  startIcon={<PhotoCamera/>}
+                  onChange={handleFileUpload}
+                >
+                  Upload
+                  <input hidden accept="image/*" multiple type="file" />
+                </Button>
+                <Typography>
+                  {imgFile && (imgFile.name)}
+                </Typography>
+              </Box>
+              <Box
+                display={"flex"}
+                justifyContent={"space-between"}
+                alignItems={"center"}
+              >
+                
                 <Button
                   type="submit"
                   variant="contained"

@@ -29,7 +29,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 
 function Orders(props) {
-  const { user, order, setNoti } = props;
+  const { user, order, setNoti, refetch } = props;
   const [open, setOpen] = useState(false);
   const [orderStatus, setOrderStatus] = useState(order.order_status);
   const [orderChecked, setOrderCheked] = useState(false);
@@ -81,6 +81,7 @@ function Orders(props) {
       // TODO: to replace alert with MUI Snackbar
       alert("Order data has been updated");
       setOrderCheked();
+      refetch();
       // setNoti(true, `"${user.username}'s data has been updated"`);
     } catch (err) {
       console.error(err);
@@ -115,8 +116,7 @@ function Orders(props) {
           {/* TODO: to set Alert which will be activated after a certain amount of time has passed */}
           {/* TODO: to change font color after a certain amount of time has passed */}
           {/* TODO: once order staus is changed to "Served" and saved, the elapsed time counter should stop */}
-          <Typography variant="body2">{dayjs().diff(dayjs(order.createdAt), "min")}</Typography>
-          {dayjs(order.createdAt).format("HH:mm:ss")}
+          <Typography variant="body2">{dayjs(dayjs().diff(dayjs(order.createdAt))).format("mm:ss")}</Typography>
         </TableCell>
         <TableCell align="center">
           <Typography variant="body2">
@@ -247,7 +247,7 @@ function Orders(props) {
 }
 
 export default function OrderStatus() {
-  const { loading, data: ordersList } = useQuery(GET_ORDERS);
+  const { loading, data: ordersList, refetch: refetchOrders } = useQuery(GET_ORDERS);
 
   useEffect(() => {
     if (loading) {
@@ -318,6 +318,7 @@ export default function OrderStatus() {
                     // setNotiMsg(msg);
                     // setOpenNoti(openStatus);
                   }}
+                  refetch={refetchOrders}
                 />
               ))}
           </TableBody>
