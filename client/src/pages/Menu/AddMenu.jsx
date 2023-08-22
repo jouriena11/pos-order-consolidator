@@ -19,6 +19,8 @@ import {
   Select,
   MenuItem,
   IconButton,
+  Card,
+  CardMedia,
 } from "@mui/material";
 
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
@@ -34,9 +36,12 @@ export default function AddMenu() {
 
   const [nameError, setNameError] = useState(false);
   const [imgFile, setImgFile] = useState(undefined);
+  const [previewImg, setPreviewImg] = useState("")
 
   const { loading, data: menuCategoriesList } = useQuery(GET_MENU_CATEGORIES);
   const [addMenu, { error, data }] = useMutation(ADD_MENU);
+
+  const fieldLabelWidth = "100px";
 
   useEffect(() => {
     if (loading) {
@@ -61,7 +66,7 @@ export default function AddMenu() {
   const handleFileUpload = (event) => {
     setImgFile(event.target.files[0]);
     const tempURLFile = URL.createObjectURL(event.target.files[0])
-    console.log(tempURLFile);
+    setPreviewImg(tempURLFile);
   }
 
   const handleSubmit = async (event) => {
@@ -112,7 +117,7 @@ export default function AddMenu() {
     setAddMenuFormData({ ...addMenuFormData, category_id: event.target.value });
   };
 
-  const fieldLabelWidth = "100px";
+  
 
   return (
     <ThemeProvider theme={theme}>
@@ -231,13 +236,24 @@ export default function AddMenu() {
                   component="label" 
                   startIcon={<PhotoCamera/>}
                   onChange={handleFileUpload}
+                  sx={{mr: 1}}
                 >
                   Upload
                   <input hidden accept="image/*" multiple type="file" />
                 </Button>
-                <Typography>
+                <Typography >
                   {imgFile && (imgFile.name)}
                 </Typography>
+                {imgFile && (
+                  <Card>
+                    <CardMedia
+                      sx={{ height: 140 }}
+                      src={previewImg}
+                      title="Preview Image"
+                    />
+                  </Card>
+                )}
+                
               </Box>
               <Box
                 display={"flex"}

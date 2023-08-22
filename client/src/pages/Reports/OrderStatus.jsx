@@ -4,6 +4,7 @@ import { GET_ORDERS } from "../../utils/queries";
 import { UPDATE_ORDER } from "../../utils/mutations";
 import Auth from "../../utils/auth";
 import dayjs from "dayjs";
+import duration from 'dayjs/plugin/duration'
 
 import {
   Table,
@@ -27,16 +28,33 @@ import {
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
+import { red } from "@mui/material/colors";
+
+dayjs.extend(duration)
 
 function Orders(props) {
-  const { user, order, setNoti, refetch } = props;
+  const { order, setNoti, refetch } = props;
   const [open, setOpen] = useState(false);
   const [orderStatus, setOrderStatus] = useState(order.order_status);
   const [orderChecked, setOrderCheked] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState("00:00");
+  const [updateOrder] = useMutation(UPDATE_ORDER);
 
   const token = Auth.loggedIn() ? Auth.getToken() : null;
-
   const contextUser = Auth.getProfile().data.role;
+
+  useEffect(() => {
+      const timeInterval = setInterval(() => {      
+        const elapsedTime = dayjs().diff(dayjs(order.createdAt));
+
+        // TODO: to polish font, font size, font color
+        setElapsedTime(<Typography sx={{color: elapsedTime < 1000 * 60 * 10 ? "black" : "red"}}>{dayjs.duration(elapsedTime).format("HH:mm:ss")}</Typography>);
+
+      }, 1000);
+      return () => {
+        clearInterval(timeInterval) // cleanup function; executed when component is unmounted, e.g. component is refreshed, deleted, updated
+      }
+  }, [order.createdAt])
 
   const handleChangeOrderStatus = (event) => {
     setOrderStatus(event.target.value);
@@ -60,10 +78,7 @@ function Orders(props) {
         return { sx: { backgroundColor: "#EFD6AC" } };
     }
   };
-
   const orderStatusColor = selectOrderBgColor(orderStatus);
-
-  const [updateOrder, { loading, data }] = useMutation(UPDATE_ORDER);
 
   const handleSaveButtonClick = async () => {
     try {
@@ -112,11 +127,8 @@ function Orders(props) {
           </Typography>
         </TableCell>
         <TableCell align="center">
-          {/* TODO: to display real-time elapsed time counter */}
-          {/* TODO: to set Alert which will be activated after a certain amount of time has passed */}
-          {/* TODO: to change font color after a certain amount of time has passed */}
           {/* TODO: once order staus is changed to "Served" and saved, the elapsed time counter should stop */}
-          <Typography variant="body2">{dayjs(dayjs().diff(dayjs(order.createdAt))).format("mm:ss")}</Typography>
+          <Typography variant="body2">{elapsedTime}</Typography>
         </TableCell>
         <TableCell align="center">
           <Typography variant="body2">
@@ -249,7 +261,7 @@ function Orders(props) {
 export default function OrderStatus() {
   const { loading, data: ordersList, refetch: refetchOrders } = useQuery(GET_ORDERS);
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (loading) {
       console.log("Loading...");
     } else {
@@ -259,7 +271,7 @@ export default function OrderStatus() {
       );
       // console.log("Loading completed")
     }
-  }, [ordersList]);
+  }, [ordersList]);*/
 
   return (
     <>
@@ -285,7 +297,9 @@ export default function OrderStatus() {
               </TableCell>
               <TableCell align="center" sx={{ fontWeight: 700 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  Elapsed Time
+                  Elapsed Time 
+                  <br/>
+                  (Hour/Min/Sec)
                 </Typography>
               </TableCell>
               <TableCell align="center" sx={{ fontWeight: 700 }}>

@@ -1,0 +1,36 @@
+version: '3.1'
+
+services:
+  pos-nodejs:
+    container_name: pos-nodejs
+    image: node:18.16.1-alpine
+    restart: always
+    volumes: 
+      - .:/usr/src/app
+    working_dir: /usr/src/app
+    ports:
+      - 4002:3000
+    command: >
+      /bin/sh -c "yarn install
+      && yarn start"
+  
+  pos-mongo:
+    container_name: pos-mongo
+    image: mongo
+    restart: always
+    volumes:
+      - pos-mongo-vol:/data/db
+    ports: 
+      - 27017:27017
+  
+  pos-nginx-server:
+    container_name: pos-nginx-server
+    image: nginx
+    restart: always
+    volumes: 
+      - .:/usr/share/nginx/html
+    ports: 
+      - 8082:80
+  
+volumes:
+  pos-mongo-vol:
