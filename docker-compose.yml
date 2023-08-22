@@ -9,10 +9,12 @@ services:
       - .:/usr/src/app
     working_dir: /usr/src/app
     ports:
-      - 4002:3000
+      - 4003:3000
     command: >
       /bin/sh -c "yarn install
       && yarn start"
+    depends_on:
+      - pos-mongo
   
   pos-mongo:
     container_name: pos-mongo
