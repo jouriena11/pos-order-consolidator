@@ -4,7 +4,6 @@ services:
   pos-nodejs:
     container_name: pos-nodejs
     image: node:18.16.1-alpine
-    restart: always
     volumes: 
       - .:/usr/src/app
     working_dir: /usr/src/app
@@ -17,7 +16,6 @@ services:
   pos-mongo:
     container_name: pos-mongo
     image: mongo
-    restart: always
     volumes:
       - pos-mongo-vol:/data/db
     ports: 
@@ -26,7 +24,6 @@ services:
   pos-nginx-server:
     container_name: pos-nginx-server
     image: nginx
-    restart: always
     volumes: 
       - .:/usr/share/nginx/html
     ports: 
