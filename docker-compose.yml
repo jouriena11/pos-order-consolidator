@@ -12,7 +12,7 @@ services:
       - 4003:3000
     command: >
       /bin/sh -c "yarn install
-      && yarn start"
+      && yarn develop"
   
   pos-mongo:
     container_name: pos-mongo
@@ -21,7 +21,7 @@ services:
     volumes:
       - pos-mongo-vol:/data/db
     ports: 
-      - 27017:27017
+      - 27018:27017
   
   pos-nginx-server:
     container_name: pos-nginx-server
