@@ -8,7 +8,7 @@ This point-of-sale (POS) web application is designed to manage restaurant orders
 
 ## **URLs**
 ---
-- [Deployed Application](https://post-order-consolidator.herokuapp.com/)
+- [Deployed Application](http://34.151.88.199:4003/)
 - [GitHub Repository URL](https://github.com/jouriena11/pos-order-consolidator)
 
 <br>
